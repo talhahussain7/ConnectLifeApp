@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "727287294635",
+    "firebase_url": "https://connectlife-91cd9.firebaseio.com",
+    "project_id": "connectlife-91cd9",
+    "storage_bucket": "connectlife-91cd9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:727287294635:android:fa21503bd5cc22621925ee",
+        "android_client_info": {
+          "package_name": "com.example.connectlife"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "727287294635-f6e5j00sp0l7jj9kth4udj018fu4cvsc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.connectlife",
+            "certificate_hash": "0d07fb254a1377d6becb5a68d0c6726b2e91a2a0"
+          }
+        },
+        {
+          "client_id": "727287294635-c7gdbincojsoh8qrbevarrgsnkd575ut.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCGhltLUG50d2u4DnfE9l8ASB5YfQb5g5s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "727287294635-c7gdbincojsoh8qrbevarrgsnkd575ut.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

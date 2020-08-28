@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">ConnectLife</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="nav_drawer_open">Open</string>
+    <string name="nav_drawer_close">Close</string>
+    <string name="mapbox_access_token">pk.eyJ1IjoidGFsaGFodXNzYWluNyIsImEiOiJjazNnNTZzd3UwYXk3M3N0NnV1dGVqejR3In0.icANnxJNla_sxuJHKaGhoQ</string>
+
+</resources>
