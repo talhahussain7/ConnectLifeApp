@@ -102,6 +102,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     public void onComplete(@NonNull Task<Void> task) {
                         if(task.isSuccessful()){
                             Toast.makeText(MainActivity.this, "Complete this", Toast.LENGTH_SHORT).show();
+
+                            FirebaseFirestore.getInstance().collection("users").document(user.getUid()).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                if(task.isSuccessful()){
+                                    Toast.makeText(getApplicationContext(), "User Deleted", Toast.LENGTH_SHORT).show();
+                                    startActivity(new Intent(MainActivity.this,WelcomeActivity.class));
+                                    finish();
+                                }     else{
+                                    Toast.makeText(getApplicationContext(), "Could Not delete the user! Sorry", Toast.LENGTH_SHORT).show();
+                                }
+                                }
+                            });
+
+
                            /* FirebaseFirestore.getInstance().document(user.getUid()).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {

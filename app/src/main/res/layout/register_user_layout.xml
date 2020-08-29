@@ -61,6 +61,7 @@ you use Connect Life.We validate through your phone number."/>
                     android:drawablePadding="10dp"
                     android:hint="Talha Hussain "
                     android:id="@+id/name_field"
+                    android:maxLines="1"
                     android:layout_marginBottom="8dp"/>
 
                 <TextView
@@ -77,6 +78,7 @@ you use Connect Life.We validate through your phone number."/>
                     android:drawableLeft="@drawable/ic_baseline_email_24"
                     android:drawablePadding="10dp"
                     android:id="@+id/email_field"
+                    android:maxLines="1"
                     android:hint="talhahussainb@gmail.com"
                     android:layout_marginBottom="8dp"/>
                 <TextView
@@ -94,25 +96,62 @@ you use Connect Life.We validate through your phone number."/>
                     android:drawablePadding="10dp"
                     android:hint="07/03/1998"
                     android:id="@+id/dob_field"
+                    android:maxLines="1"
                     android:layout_marginBottom="8dp"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Address: "
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textStyle="bold" />
-                <EditText
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/edit_text_style"
-                    android:padding="8dp"
-                    android:drawableLeft="@drawable/ic_baseline_location_on_24"
-                    android:drawablePadding="10dp"
-                    android:id="@+id/address_field"
-                    android:hint="Rundradiogatan 2, Frölunda"
-                    android:layout_marginBottom="8dp"/>
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="8dp">
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_weight="1.25">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="City:"
+                            android:textStyle="bold"
+                            android:textColor="@color/colorPrimaryDark"/>
+                        <EditText
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:padding="8dp"
+                            android:maxLines="1"
+                            android:id="@+id/city_field"
+                            android:drawablePadding="10dp"
+                            android:drawableLeft="@drawable/ic_baseline_location_on_24"
+                            android:background="@drawable/edit_text_style"
+                            android:hint="Gothenburg"/>
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginLeft="5dp"
+                        android:layout_weight="1">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Country:"
+                            android:textStyle="bold"
+                            android:textColor="@color/colorPrimaryDark"/>
+                        <EditText
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:padding="8dp"
+                            android:background="@drawable/edit_text_style"
+                            android:drawableLeft="@drawable/ic_baseline_flag_24"
+                            android:drawablePadding="10dp"
+                            android:maxLines="1"
+                            android:id="@+id/country_field"
+                            android:hint="Sweden"/>
 
+                    </LinearLayout>
 
+                </LinearLayout>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -141,6 +180,7 @@ you use Connect Life.We validate through your phone number."/>
                         android:drawableLeft="@drawable/ic_baseline_local_phone_24"
                         android:drawablePadding="10dp"
                         android:layout_marginLeft="5dp"
+                        android:maxLines="1"
                         android:id="@+id/phone_field"
                         android:inputType="number"/>
                 </LinearLayout>
@@ -151,7 +191,7 @@ you use Connect Life.We validate through your phone number."/>
                     android:text="Already have an account? Sign In"
                     android:gravity="right"
                     android:textAllCaps="false"
-                    android:layout_marginTop="5dp"
+                    android:layout_marginTop="10dp"
                     android:textColor="@color/colorPrimaryDark"/>
 
 

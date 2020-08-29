@@ -46,7 +46,7 @@ public class RegisterFragment extends Fragment {
     PhoneAuthProvider.ForceResendingToken token;
     Button RegisterBtn;
     boolean verificationInProgress = false;
-    EditText phoneField,nameField,addressField,dobField,emailField ,otpField;
+    EditText phoneField,nameField,cityField,countryField,dobField,emailField ,otpField;
     CountryCodePicker ccp;
     View phoneLayout;
     Activity activity;
@@ -85,7 +85,8 @@ public class RegisterFragment extends Fragment {
         RegisterBtn=view.findViewById(R.id.register_btn);
         phoneField=view.findViewById(R.id.phone_field);
         nameField=view.findViewById(R.id.name_field);
-        addressField=view.findViewById(R.id.address_field);
+        cityField=view.findViewById(R.id.city_field);
+        countryField=view.findViewById(R.id.country_field);
         dobField=view.findViewById(R.id.dob_field);
         emailField=view.findViewById(R.id.email_field);
 
@@ -97,12 +98,12 @@ public class RegisterFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
-                String name,phoneNumber,address,dob,email ;
+                String name,phoneNumber,country, city,dob,email ;
                 name="";
                 phoneNumber="";
-                address="";
                 dob="";
-                address="";
+                country="";
+                city="";
 
 
                 if(!(isNameValid()&&isAddressValid()&&isDobValid()&&isEmailValid()&&isPhoneValid())){
@@ -115,7 +116,8 @@ public class RegisterFragment extends Fragment {
                     // Fetch all data
                     name = nameField.getText().toString();
                     phoneNumber=phoneField.getText().toString();
-                    address =addressField.getText().toString();
+                    country =countryField.getText().toString();
+                    city=cityField.getText().toString();
                     dob = dobField.getText().toString();
                     email =emailField.getText().toString();
                     phoneNumber = ccp.getFullNumberWithPlus()+phoneNumber;
@@ -238,9 +240,11 @@ public class RegisterFragment extends Fragment {
                 if(task.isSuccessful()){
                     Map<String,Object> userInfo = new HashMap<>();
                     userInfo.put("name",nameField.getText().toString());
-                    userInfo.put("address",addressField.getText().toString());
+                    userInfo.put("city",cityField.getText().toString());
+                    userInfo.put("country",countryField.getText().toString());
                     userInfo.put("dob",dobField.getText().toString());
                     userInfo.put("email",emailField.getText().toString());
+                    userInfo.put("phoneNumber",ccp.getFullNumber()+phoneField.getText().toString());
                 UID= fAuth.getCurrentUser().getUid();
                 DocumentReference documentReference = firebaseFirestore.collection("users").document(UID);
                 documentReference.set(userInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -261,7 +265,7 @@ public class RegisterFragment extends Fragment {
         return !TextUtils.isEmpty(nameField.getText().toString());
     }
     public boolean isAddressValid(){
-        return !TextUtils.isEmpty(addressField.getText().toString());
+        return !TextUtils.isEmpty(cityField.getText().toString()) && !TextUtils.isEmpty(countryField.getText().toString());
     }
     public boolean isDobValid(){
         return !TextUtils.isEmpty(dobField.getText().toString());

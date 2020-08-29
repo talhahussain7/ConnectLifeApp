@@ -4,21 +4,24 @@ import java.util.List;
 
 public class User {
     String name;
-    int age;
-    int phoneNumber;
-    Address address;
-    String bloodGroup;
-    List<BloodRequest> list;
-    String status;
+    String city;
+    String country;
+    String dob;
+    String phoneNumber;
+    String email;
+    //Address address;
+    //String bloodGroup;
+    //List<BloodRequest> list;
+    //String status;
 
-    public User(String name, int age, int phoneNumber, Address address, String bloodGroup, List<BloodRequest> list, String status) {
+
+    public User(String name, String city, String country, String dob, String phoneNumber, String email) {
         this.name = name;
-        this.age = age;
+        this.city = city;
+        this.country = country;
+        this.dob = dob;
         this.phoneNumber = phoneNumber;
-        this.address = address;
-        this.bloodGroup = bloodGroup;
-        this.list = list;
-        this.status = status;
+        this.email = email;
     }
 
     public String getName() {
@@ -29,51 +32,43 @@ public class User {
         this.name = name;
     }
 
-    public int getAge() {
-        return age;
+    public String getCity() {
+        return city;
     }
 
-    public void setAge(int age) {
-        this.age = age;
+    public void setCity(String city) {
+        this.city = city;
     }
 
-    public int getPhoneNumber() {
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getDob() {
+        return dob;
+    }
+
+    public void setDob(String dob) {
+        this.dob = dob;
+    }
+
+    public String getPhoneNumber() {
         return phoneNumber;
     }
 
-    public void setPhoneNumber(int phoneNumber) {
+    public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
 
-    public Address getAddress() {
-        return address;
+    public String getEmail() {
+        return email;
     }
 
-    public void setAddress(Address address) {
-        this.address = address;
-    }
-
-    public String getBloodGroup() {
-        return bloodGroup;
-    }
-
-    public void setBloodGroup(String bloodGroup) {
-        this.bloodGroup = bloodGroup;
-    }
-
-    public List<BloodRequest> getList() {
-        return list;
-    }
-
-    public void setList(List<BloodRequest> list) {
-        this.list = list;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

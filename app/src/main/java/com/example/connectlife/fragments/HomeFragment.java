@@ -10,12 +10,21 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.connectlife.R;
+import com.example.connectlife.models.User;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 
 public class HomeFragment extends Fragment {
-
+    TextView nameView,userLocation;
+    User user;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -61,6 +70,35 @@ public class HomeFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_home, container, false);
+        nameView= view.findViewById(R.id.user_name);
+        userLocation= view.findViewById(R.id.user_location);
+
+
+        final DocumentReference docRef = FirebaseFirestore.getInstance().collection("users").document(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+
+                String name = documentSnapshot.get("name").toString();
+                String phoneNumber = documentSnapshot.get("phoneNumber").toString();
+                String city = documentSnapshot.get("city").toString();
+                String country = documentSnapshot.get("country").toString();
+                String dob = documentSnapshot.get("dob").toString();
+                String email = documentSnapshot.get("email").toString();
+
+                city = city.substring(0,1).toUpperCase()+ city.substring(1);
+                country = country.substring(0,1).toUpperCase()+ country.substring(1);
+
+                user = new User(name,city,country,dob,phoneNumber,email);
+                nameView.setText(user.getName());
+
+
+                userLocation.setText(user.getCity() +", "+user.getCountry());
+            }
+        });
+
+
+
 
 
         return view;
