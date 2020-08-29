@@ -1,5 +1,6 @@
 package com.example.connectlife.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AlertDialog;
@@ -9,6 +10,7 @@ import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -47,8 +49,24 @@ public class HomeFragment extends Fragment {
                     View dialogView = inflater.inflate(R.layout.invite_dialog, null);
                     dialogBuilder.setView(dialogView);
                     ImageButton closeBtn = dialogView.findViewById(R.id.close_btn);
-
+                    Button inviteToAppBtn = dialogView.findViewById(R.id.invite_app_btn);
                     final AlertDialog alertDialog = dialogBuilder.create();
+
+                    inviteToAppBtn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            try{
+                                Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                                shareIntent.setType("text/plain");
+                                shareIntent.putExtra(Intent.EXTRA_SUBJECT,getString(R.string.app_name));
+                                String shareMessage = "http://play.google.com/store/apps/details?id="+ getContext().getPackageName();
+                                shareIntent.putExtra(Intent.EXTRA_TEXT,shareMessage);
+                                startActivity(Intent.createChooser(shareIntent,"Share with"));
+                            }catch (Exception e){
+                                e.printStackTrace();
+                            }
+                        }
+                    });
 
                     closeBtn.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -91,8 +109,6 @@ public class HomeFragment extends Fragment {
 
                 user = new User(name,city,country,dob,phoneNumber,email);
                 nameView.setText(user.getName());
-
-
                 userLocation.setText(user.getCity() +", "+user.getCountry());
             }
         });

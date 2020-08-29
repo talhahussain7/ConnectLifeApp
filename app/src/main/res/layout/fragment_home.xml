@@ -47,7 +47,7 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/user_name"
                     android:textColor="@android:color/white"
-                    android:text="Rashid Mahmood"
+                    android:text=""
                     android:textStyle="bold"
                     android:textSize="22sp"/>
                 <TextView
@@ -55,7 +55,7 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/user_location"
                     android:textColor="@android:color/white"
-                    android:text="Gothenburg, Sweden"
+                    android:text=""
                     android:textSize="15sp"/>
             </LinearLayout>
 

@@ -47,6 +47,7 @@ AND HELP US SERVE YOU AND OTHERS BETTER!"/>
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:id="@+id/invite_app_btn"
                 android:text="INVITE"
                 android:background="@color/colorYellow"
                 android:layout_marginTop="5dp"

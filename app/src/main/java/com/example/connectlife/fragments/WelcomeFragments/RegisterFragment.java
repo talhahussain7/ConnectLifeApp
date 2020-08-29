@@ -244,6 +244,7 @@ public class RegisterFragment extends Fragment {
                     userInfo.put("country",countryField.getText().toString());
                     userInfo.put("dob",dobField.getText().toString());
                     userInfo.put("email",emailField.getText().toString());
+                    userInfo.put("LatLng","0,0");
                     userInfo.put("phoneNumber",ccp.getFullNumber()+phoneField.getText().toString());
                 UID= fAuth.getCurrentUser().getUid();
                 DocumentReference documentReference = firebaseFirestore.collection("users").document(UID);
