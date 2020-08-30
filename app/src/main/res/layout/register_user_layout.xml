@@ -185,12 +185,13 @@ you use Connect Life.We validate through your phone number."/>
                         android:inputType="number"/>
                 </LinearLayout>
                 <Button
-                    android:layout_width="match_parent"
-                    android:layout_height="20dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="25dp"
                     android:background="@android:color/transparent"
                     android:text="Already have an account? Sign In"
-                    android:gravity="right"
+                    android:layout_gravity="right"
                     android:textAllCaps="false"
+                    android:id="@+id/sign_in_btn"
                     android:layout_marginTop="10dp"
                     android:textColor="@color/colorPrimaryDark"/>
 

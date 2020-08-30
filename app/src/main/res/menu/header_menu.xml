@@ -7,4 +7,8 @@
         <item android:id="@+id/nav_nearby" android:title="Members Nearby"/>
         <item android:id="@+id/nav_delete_acc" android:title="Delete Account"/>
     </group>
+
+    <group >
+        <item android:id="@+id/nav_signout" android:title="Sign Out">Sign Out</item>
+    </group>
 </menu>

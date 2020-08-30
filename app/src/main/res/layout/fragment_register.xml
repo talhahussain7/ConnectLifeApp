@@ -31,7 +31,7 @@
 
 
     <include layout="@layout/register_user_layout"
-        android:id="@+id/register_layout"/>
+        android:id="@+id/register_layout" />
     <include layout="@layout/otp_request_layout"
         android:id="@+id/otp_layout"
         android:visibility="gone"

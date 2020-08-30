@@ -22,4 +22,9 @@ public static FragmentManager fragmentManager;
     public static void addDetailsPage(){
         fragmentManager.beginTransaction().replace(R.id.welcome_container,new AddDetailsFragment(),"Add Details Fragment").commit();
     }
+
+    @Override
+    public void onBackPressed() {
+
+    }
 }

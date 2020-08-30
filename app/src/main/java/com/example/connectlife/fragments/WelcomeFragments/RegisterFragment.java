@@ -31,6 +31,8 @@ import com.google.firebase.auth.PhoneAuthProvider;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.rilixtech.widget.countrycodepicker.CountryCodePicker;
 import com.tapadoo.alerter.Alerter;
 
@@ -44,7 +46,7 @@ public class RegisterFragment extends Fragment {
     FirebaseFirestore firebaseFirestore;
     String authenticationId;
     PhoneAuthProvider.ForceResendingToken token;
-    Button RegisterBtn;
+    Button RegisterBtn,signInButton;
     boolean verificationInProgress = false;
     EditText phoneField,nameField,cityField,countryField,dobField,emailField ,otpField;
     CountryCodePicker ccp;
@@ -89,10 +91,18 @@ public class RegisterFragment extends Fragment {
         countryField=view.findViewById(R.id.country_field);
         dobField=view.findViewById(R.id.dob_field);
         emailField=view.findViewById(R.id.email_field);
+        signInButton = view.findViewById(R.id.sign_in_btn);
 
         otpField=view.findViewById(R.id.otp_field);
         ccp = (CountryCodePicker) view.findViewById(R.id.ccp);
         phoneLayout=view.findViewById(R.id.phoneLayout);
+
+        signInButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                WelcomeActivity.fragmentManager.beginTransaction().replace(R.id.welcome_container,new LoginFragment(),"Login Fragment").commit();
+            }
+        });
 
         RegisterBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -113,59 +123,16 @@ public class RegisterFragment extends Fragment {
                         .setBackgroundColorRes(R.color.colorPrimary) // or setBackgroundColorInt(Color.CYAN)
                         .show();
                 }else{
-                    // Fetch all data
-                    name = nameField.getText().toString();
-                    phoneNumber=phoneField.getText().toString();
-                    country =countryField.getText().toString();
-                    city=cityField.getText().toString();
-                    dob = dobField.getText().toString();
-                    email =emailField.getText().toString();
+                    // Fetch Phone Number.
                     phoneNumber = ccp.getFullNumberWithPlus()+phoneNumber;
-                    sendVerificationCodeToUser(phoneNumber);
+                    numberAlreadyExists(phoneNumber);
                 }
-
-
-
-
-
-                /*try {
-                    name = nameField.getText().toString();
-                     phoneNumber=phoneField.getText().toString();
-                     address =addressField.getText().toString();
-                     dob = dobField.getText().toString();
-                     email =emailField.getText().toString();
-                }catch (Exception e){
-                    Toast.makeText(getContext(),e.getMessage(), Toast.LENGTH_SHORT).show();
-                }*/
-
 
 
             }
         });
 
-       /* continueBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(!verificationInProgress){
-                    if(!phoneField.getText().toString().isEmpty()){
-                        requestOTP(ccp.getFullNumberWithPlus()+phoneField.getText().toString());
-                        otpField.setText("");
-                    }else{
-                        phoneField.setError("Enter the number please!");
-                    }
 
-                }else{
-                    if(!otpField.getText().toString().isEmpty()){
-                        String OTP =  otpField.getText().toString();
-                        PhoneAuthCredential phoneAuthCredential = PhoneAuthProvider.getCredential(authenticationId,OTP);
-                        verifyAuth(phoneAuthCredential);
-                    }else{
-                        otpField.setError("Enter OTP!");
-                    }
-
-                }
-            }
-        });*/
         fAuth= FirebaseAuth.getInstance();
         firebaseFirestore=FirebaseFirestore.getInstance();
 
@@ -194,7 +161,7 @@ public class RegisterFragment extends Fragment {
         @Override
         public void onCodeSent(@NonNull String s, @NonNull PhoneAuthProvider.ForceResendingToken forceResendingToken) {
             super.onCodeSent(s, forceResendingToken);
-            Toast.makeText(getContext(), "I was called", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getContext(), "I was called", Toast.LENGTH_SHORT).show();
             codeBySystem= s;
             registerView.setVisibility(View.GONE);
             otpView.setVisibility(View.VISIBLE);
@@ -245,7 +212,9 @@ public class RegisterFragment extends Fragment {
                     userInfo.put("dob",dobField.getText().toString());
                     userInfo.put("email",emailField.getText().toString());
                     userInfo.put("LatLng","0,0");
-                    userInfo.put("phoneNumber",ccp.getFullNumber()+phoneField.getText().toString());
+                    userInfo.put("requestsNum","0");
+                    userInfo.put("livesSavedNum","0");
+                    userInfo.put("phoneNumber",ccp.getFullNumberWithPlus()+phoneField.getText().toString());
                 UID= fAuth.getCurrentUser().getUid();
                 DocumentReference documentReference = firebaseFirestore.collection("users").document(UID);
                 documentReference.set(userInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -256,7 +225,11 @@ public class RegisterFragment extends Fragment {
                     }
                 });
                 }else{
-                    Toast.makeText(getContext(), "Could Not Sign Up!", Toast.LENGTH_SHORT).show();
+                    Alerter.create(getActivity())
+                            .setText("Invalid Passcode!")
+                            .setBackgroundColorRes(R.color.colorPrimaryDark)
+                            .setTitle("Try Again!").show();
+                  //  Toast.makeText(getContext(), "Invalid Passcode! Try Again", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -276,6 +249,37 @@ public class RegisterFragment extends Fragment {
     }
     public boolean isPhoneValid(){
         return !TextUtils.isEmpty(phoneField.getText().toString());
+    }
+
+
+    public void numberAlreadyExists(final String phoneNumber){
+
+        firebaseFirestore.collection("users").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                boolean exists = false;
+                if(task.isSuccessful()){
+                    for(QueryDocumentSnapshot document :task.getResult()){
+                        if(document.getData().containsKey("phoneNumber")){
+                            if(document.getData().get("phoneNumber").equals(phoneNumber)){
+                                exists = true;
+                            }
+                        }
+                    }
+                    if(exists){
+                        Alerter.create(getActivity())
+                                .setTitle("Invalid Number!")
+                                .setText("Account Already Exists! Please Login")
+                                .setBackgroundColorRes(R.color.colorPrimaryDark)
+                                .show();
+                    }else{
+                        sendVerificationCodeToUser(phoneNumber);
+
+                    }
+                }
+            }
+
+        });
     }
 
 

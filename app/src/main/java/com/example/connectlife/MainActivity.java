@@ -177,7 +177,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     Toast.makeText(getApplicationContext(), "User Deletion failed: USER IS NULL", Toast.LENGTH_SHORT).show();
 
                 }
-
+                break;
+            case R.id.nav_signout:
+                firebaseAuth.signOut();
+                startActivity(new Intent(this,WelcomeActivity.class));
+                finish();
                 break;
             default:
                 break;

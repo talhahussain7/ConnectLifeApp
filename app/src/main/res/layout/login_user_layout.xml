@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Tap continue to get an SMS confirmation to help
+you use Connect Life.We would like your phone number."/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Phone Number:"
+        android:textStyle="bold"
+        android:layout_marginTop="10dp"
+        android:textColor="@color/colorPrimaryDark"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/phoneLayout"
+        android:orientation="horizontal">
+        <com.rilixtech.widget.countrycodepicker.CountryCodePicker
+            android:id="@+id/ccp_login"
+            android:padding="9dp"
+            android:background="@drawable/edit_text_style"
+            android:layout_width="0dp"
+            android:layout_weight="5.5"
+            android:layout_height="wrap_content" />
+        <EditText
+            android:layout_width="0dp"
+            android:layout_weight="10"
+            android:layout_height="wrap_content"
+            android:hint="48330269"
+            android:drawableLeft="@drawable/ic_baseline_local_phone_24"
+            android:drawablePadding="10dp"
+            android:background="@drawable/edit_text_style"
+            android:padding="9dp"
+            android:layout_marginLeft="5dp"
+            android:maxLines="1"
+            android:id="@+id/phone_field"
+            android:inputType="number"/>
+    </LinearLayout>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:background="@android:color/transparent"
+        android:text="Dont Have an Account? Sign Up"
+        android:gravity="right"
+        android:textAllCaps="false"
+        android:layout_marginTop="5dp"
+        android:id="@+id/acc_register_btn"
+        android:textColor="@color/colorPrimaryDark"/>
+
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Verification Code"
+        android:layout_marginTop="5dp"
+        android:background="@drawable/edit_text_style"
+        android:padding="9dp"
+        android:visibility="gone"
+        android:id="@+id/otp_field"
+        android:inputType="number"/>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Continue"
+        android:textAllCaps="true"
+        android:id="@+id/continue_btn"
+        android:layout_marginTop="10dp"
+        android:textColor="@android:color/white"
+        android:background="@color/colorPrimary"/>
+
+</LinearLayout>
