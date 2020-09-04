@@ -9,6 +9,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.FragmentManager;
 
 import android.Manifest;
 import android.content.Intent;
@@ -29,6 +30,8 @@ import android.widget.Toast;
 import com.example.connectlife.fragments.HomeFragment;
 import com.example.connectlife.fragments.MembersNearby;
 import com.example.connectlife.fragments.RequestsFragment;
+import com.example.connectlife.fragments.WelcomeFragments.AddRequestFragment;
+import com.example.connectlife.models.User;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -60,11 +63,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     DrawerLayout drawerLayout;
     Toolbar toolbar;
     public static NavigationView navigationView;
-    TextView fragmentTitle;
+    static TextView fragmentTitle;
     FusedLocationProviderClient fusedLocationProviderClient;
     FirebaseFirestore firebaseFirestore;
     FirebaseAuth firebaseAuth;
     DocumentReference userDocument;
+    public static User currentUser;
+
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -73,7 +78,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
         firebaseAuth = FirebaseAuth.getInstance();
         firebaseFirestore = FirebaseFirestore.getInstance();
-        userDocument = firebaseFirestore.collection("users").document(firebaseAuth.getCurrentUser().getUid());
+      userDocument = firebaseFirestore.collection("users").document(firebaseAuth.getCurrentUser().getUid());
+       Log.i("userId",firebaseAuth.getCurrentUser().getUid());
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
         getLocation();
@@ -175,14 +181,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 }else{
                     Toast.makeText(getApplicationContext(), "User Deletion failed: USER IS NULL", Toast.LENGTH_SHORT).show();
-
                 }
-                break;
+
+
             case R.id.nav_signout:
                 firebaseAuth.signOut();
                 startActivity(new Intent(this,WelcomeActivity.class));
                 finish();
                 break;
+
             default:
                 break;
 
@@ -192,7 +199,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return false;
     }
 
-    public boolean setLocation(LatLng point){
+    public void setLocation(LatLng point){
         Map<String,Object> userInfo = new HashMap<>();
         String pointStr = point.getLatitude()+ ","+point.getLongitude();
         userInfo.put("LatLng",pointStr);
@@ -207,8 +214,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
-        return true;
     }
+
+
+
 
 
 

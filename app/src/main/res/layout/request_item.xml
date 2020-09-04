@@ -2,65 +2,99 @@
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:mapbox="http://schemas.android.com/tools"
+    android:layout_margin="10dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     app:cardCornerRadius="15dp">
-    <LinearLayout
+
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="20dp"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_baseline_close_24"
+            android:background="@android:color/transparent"
+            android:layout_alignParentRight="true"
+            android:layout_margin="10dp"
+            />
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <ImageView
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:src="@drawable/ic_person"/>
+            android:orientation="vertical">
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
-                <TextView
+                android:layout_margin="15dp"
+                android:orientation="horizontal">
+                <ImageView
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:src="@drawable/ic_person"/>
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textStyle="bold"
-                    android:text="Imran Khan"
-                    android:textSize="25dp"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Requesting: A+ Blood"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Location: Doctor's Hospital, Lahore"/>
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textStyle="bold"
+                        android:id="@+id/name"
+                        android:text="Imran Khan"
+                        android:textSize="21dp"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/blood_group"
+                        android:text="Requesting: A+ Blood"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/location"
+                        android:text="Location: Doctor's Hospital, Lahore"/>
+                </LinearLayout>
             </LinearLayout>
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <Button
-                android:layout_width="0dp"
+
+
+            <com.mapbox.mapboxsdk.maps.MapView
+                android:id="@+id/mapView"
+                mapbox:mapbox_cameraTargetLat="57.708870"
+                mapbox:mapbox_cameraTargetLng="11.974560"
+                mapbox:mapbox_cameraZoom="10.5"
+                android:layout_width="match_parent"
+                android:layout_height="150dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Share"
-                android:textAllCaps="true"
-                android:textColor="@android:color/white"
-                android:background="@color/colorPrimary"
-                android:layout_marginRight="10dp"
-                android:layout_weight="1"/>
-            <Button
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:textAllCaps="true"
-                android:textColor="@android:color/white"
-                android:text="Accept Request"
-                android:background="@color/colorGreen"
-                android:layout_marginLeft="10dp"
-                android:layout_weight="1"/>
+                android:layout_marginBottom="25dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:layout_marginTop="20dp"
+                android:orientation="horizontal">
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="Share"
+                    android:textAllCaps="true"
+                    android:textColor="@android:color/white"
+                    android:background="@color/colorPrimary"
+                    android:layout_marginRight="10dp"
+                    android:layout_weight="1"/>
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:textAllCaps="true"
+                    android:textColor="@android:color/white"
+                    android:text="Accept Request"
+                    android:background="@color/colorGreen"
+                    android:layout_marginLeft="10dp"
+                    android:layout_weight="1"/>
+            </LinearLayout>
+
         </LinearLayout>
 
-    </LinearLayout>
+
+    </RelativeLayout>
+
 
 </androidx.cardview.widget.CardView>

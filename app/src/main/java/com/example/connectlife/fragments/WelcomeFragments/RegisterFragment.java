@@ -124,8 +124,11 @@ public class RegisterFragment extends Fragment {
                         .show();
                 }else{
                     // Fetch Phone Number.
-                    phoneNumber = ccp.getFullNumberWithPlus()+phoneNumber;
-                    numberAlreadyExists(phoneNumber);
+                    phoneNumber = ccp.getFullNumberWithPlus()+phoneField.getText().toString();
+                    Toast.makeText(getContext(), phoneNumber +"", Toast.LENGTH_SHORT).show();
+                        numberAlreadyExists(phoneNumber);
+
+
                 }
 
 
@@ -191,6 +194,11 @@ public class RegisterFragment extends Fragment {
             Log.i("Verification Failed", e.getMessage());
 
         }
+
+        @Override
+        public void onCodeAutoRetrievalTimeOut(@NonNull String s) {
+            super.onCodeAutoRetrievalTimeOut(s);
+        }
     };
 
     private void verifyCode(String codeByUser){
@@ -212,8 +220,8 @@ public class RegisterFragment extends Fragment {
                     userInfo.put("dob",dobField.getText().toString());
                     userInfo.put("email",emailField.getText().toString());
                     userInfo.put("LatLng","0,0");
-                    userInfo.put("requestsNum","0");
-                    userInfo.put("livesSavedNum","0");
+                    userInfo.put("requestsCount","0");
+                    userInfo.put("donationsCount","0");
                     userInfo.put("phoneNumber",ccp.getFullNumberWithPlus()+phoneField.getText().toString());
                 UID= fAuth.getCurrentUser().getUid();
                 DocumentReference documentReference = firebaseFirestore.collection("users").document(UID);

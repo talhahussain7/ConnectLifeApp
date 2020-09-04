@@ -22,10 +22,12 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.mapbox.mapboxsdk.geometry.LatLng;
 
 
 public class HomeFragment extends Fragment {
     TextView nameView,userLocation;
+    TextView livesSavedNum, requestsNum;
     User user;
 
     public HomeFragment() {
@@ -90,10 +92,13 @@ public class HomeFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
         nameView= view.findViewById(R.id.user_name);
         userLocation= view.findViewById(R.id.user_location);
+        requestsNum= view.findViewById(R.id.reqNum);
+        livesSavedNum=view.findViewById(R.id.livesSavedNum);
+
 
 
         final DocumentReference docRef = FirebaseFirestore.getInstance().collection("users").document(FirebaseAuth.getInstance().getCurrentUser().getUid());
-        docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+      docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
 
@@ -103,14 +108,22 @@ public class HomeFragment extends Fragment {
                 String country = documentSnapshot.get("country").toString();
                 String dob = documentSnapshot.get("dob").toString();
                 String email = documentSnapshot.get("email").toString();
+                LatLng coordinates = fetchUserLocation(documentSnapshot.get("LatLng").toString());
+                String livesSavedNumStr = documentSnapshot.get("donationsCount").toString();
+                String requestsNumStr = documentSnapshot.get("requestsCount").toString();
+
 
                 city = city.substring(0,1).toUpperCase()+ city.substring(1);
                 country = country.substring(0,1).toUpperCase()+ country.substring(1);
 
-                user = new User(name,city,country,dob,phoneNumber,email);
+                user = new User(FirebaseAuth.getInstance().getCurrentUser().getUid(),name,city,country,coordinates,dob,phoneNumber,email);
                 nameView.setText(user.getName());
                 userLocation.setText(user.getCity() +", "+user.getCountry());
+                livesSavedNum.setText(livesSavedNumStr);
+                requestsNum.setText(requestsNumStr);
+
             }
+
         });
 
 
@@ -118,5 +131,13 @@ public class HomeFragment extends Fragment {
 
 
         return view;
+    }
+
+    public LatLng fetchUserLocation(String coodinateStr){
+        String[] values = coodinateStr.split(",");
+        double latitude = Double.valueOf(values[0]);
+        double longitute = Double.valueOf(values[1]);
+        LatLng coodinates = new LatLng(latitude,longitute);
+        return coodinates;
     }
 }

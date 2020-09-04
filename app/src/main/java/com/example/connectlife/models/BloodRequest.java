@@ -1,27 +1,73 @@
 package com.example.connectlife.models;
 
+import com.mapbox.mapboxsdk.geometry.LatLng;
+
 public class BloodRequest {
-    User user;
-    String reqStatus;
 
-    public BloodRequest(User user, String reqStatus) {
-        this.user = user;
-        this.reqStatus = reqStatus;
+
+    String name;
+    String bloodGroup;
+    String phoneNumber;
+    String senderId;
+    String location;
+    LatLng coordinates;
+
+    public BloodRequest(String name, String bloodGroup, String phoneNumber, String senderId, String location, LatLng coordinates) {
+        this.name = name;
+        this.bloodGroup = bloodGroup;
+        this.phoneNumber = phoneNumber;
+        this.senderId = senderId;
+        this.location = location;
+        this.coordinates = coordinates;
     }
 
-    public User getUser() {
-        return user;
+    public String getName() {
+        return name;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getReqStatus() {
-        return reqStatus;
+    public String getBloodGroup() {
+        return bloodGroup;
     }
 
-    public void setReqStatus(String reqStatus) {
-        this.reqStatus = reqStatus;
+    public void setBloodGroup(String bloodGroup) {
+        this.bloodGroup = bloodGroup;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getSenderId() {
+        return senderId;
+    }
+
+    public void setSenderId(String senderId) {
+        this.senderId = senderId;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public LatLng getCoordinates() {
+        return coordinates;
+    }
+
+    public void setCoordinates(LatLng coordinates) {
+        this.coordinates = coordinates;
     }
 }
+
+
