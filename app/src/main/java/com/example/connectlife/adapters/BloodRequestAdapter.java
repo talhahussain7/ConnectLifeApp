@@ -1,16 +1,24 @@
 package com.example.connectlife.adapters;
 
 import android.content.Context;
+import android.os.Bundle;
+import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.connectlife.R;
 import com.example.connectlife.models.BloodRequest;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.messaging.FirebaseMessaging;
+
+import com.google.firebase.messaging.RemoteMessage;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.geometry.LatLng;
@@ -44,6 +52,32 @@ public class BloodRequestAdapter extends RecyclerView.Adapter<BloodRequestAdapte
         holder.nameView.setText(item.getName());
         holder.locationView.setText(item.getLocation());
         holder.bloodGroupView.setText(item.getBloodGroup());
+        holder.acceptReqBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                String topic = item.getId();
+                String senderId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+// Send a message to the devices subscribed to the provided topic.
+                FirebaseMessaging.getInstance().send(
+                        new RemoteMessage.Builder( senderId+ "@gcm.googleapis.com")
+                                .setMessageId(topic)
+                                .addData("key", "value")
+                                .build());
+// Response is a message ID string.
+                System.out.println("Successfully sent message: ");
+
+
+
+
+
+
+
+            }
+        });
+
+
         holder.mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(@NonNull final MapboxMap mapboxMap) {
@@ -87,6 +121,7 @@ public class BloodRequestAdapter extends RecyclerView.Adapter<BloodRequestAdapte
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         TextView nameView, bloodGroupView, locationView;
+        Button acceptReqBtn;
         MapView mapView;
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -94,6 +129,7 @@ public class BloodRequestAdapter extends RecyclerView.Adapter<BloodRequestAdapte
             bloodGroupView = itemView.findViewById(R.id.blood_group);
             locationView = itemView.findViewById(R.id.location);
             mapView = itemView.findViewById(R.id.mapView);
+            acceptReqBtn = itemView.findViewById(R.id.accept_req_btn);
         }
     }
 }

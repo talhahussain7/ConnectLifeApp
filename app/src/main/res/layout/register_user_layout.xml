@@ -63,28 +63,24 @@ you use Connect Life.We validate through your phone number."/>
                     android:id="@+id/name_field"
                     android:maxLines="1"
                     android:layout_marginBottom="8dp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Blood Group: "
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textStyle="bold" />
+                <Spinner
+                    android:layout_width="match_parent"
+                    android:background="@drawable/edit_text_style"
+                    android:padding="5dp"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/blood_group_selector"/>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Email: "
-                    android:textColor="@color/colorPrimaryDark"
-                    android:textStyle="bold" />
-                <EditText
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/edit_text_style"
-                    android:padding="8dp"
-                    android:drawableLeft="@drawable/ic_baseline_email_24"
-                    android:drawablePadding="10dp"
-                    android:id="@+id/email_field"
-                    android:maxLines="1"
-                    android:hint="talhahussainb@gmail.com"
-                    android:layout_marginBottom="8dp"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
                     android:text="Date of birth: "
+                    android:layout_marginTop="10dp"
                     android:textColor="@color/colorPrimaryDark"
                     android:textStyle="bold" />
                 <EditText

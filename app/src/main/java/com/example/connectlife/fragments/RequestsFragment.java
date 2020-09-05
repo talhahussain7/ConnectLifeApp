@@ -40,6 +40,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 
 import java.util.ArrayList;
@@ -96,7 +97,7 @@ RecyclerView recyclerView;
                     String city = documentSnapshot.get("city").toString();
                     String country = documentSnapshot.get("country").toString();
                     String dob = documentSnapshot.get("dob").toString();
-                    String email = documentSnapshot.get("email").toString();
+                    String bloodGroup = documentSnapshot.get("bloodGroup").toString();
                     String donationsCount = documentSnapshot.get("donationsCount").toString();
                     String requestsCount = documentSnapshot.get("requestsCount").toString();
                     LatLng coordinates = fetchUserLocation(documentSnapshot.get("LatLng").toString());
@@ -105,18 +106,13 @@ RecyclerView recyclerView;
                     city = city.substring(0,1).toUpperCase()+ city.substring(1);
                     country = country.substring(0,1).toUpperCase()+ country.substring(1);
 
-                    user = new User(firebaseAuth.getCurrentUser().getUid(),name,city,country,coordinates,dob,phoneNumber,email);
+                    user = new User(firebaseAuth.getCurrentUser().getUid(),name,city,country,coordinates,dob,phoneNumber,bloodGroup);
                 }catch (Exception e){
                     e.printStackTrace();
                 }
 
             }
         });
-
-
-
-
-
 
         return view;
     }
@@ -217,10 +213,22 @@ RecyclerView recyclerView;
                         dataPacket.put("LatLng",user.getCoordinates().getLatitude()+","+user.getCoordinates().getLongitude());
 
                         Toast.makeText(getContext(), dataPacket.toString(), Toast.LENGTH_SHORT).show();
-                        DocumentReference documentReference = firebaseFirestore.collection("bloodRequests").document();
+                        final DocumentReference documentReference = firebaseFirestore.collection("bloodRequests").document();
                         documentReference.set(dataPacket).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
+                                FirebaseMessaging.getInstance().subscribeToTopic(documentReference.getId())
+                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                Toast.makeText(getContext(), "Subscribed to the request!", Toast.LENGTH_SHORT).show();
+                                                if (!task.isSuccessful()) {
+                                                    Toast.makeText(getContext(), "Could not Subscribe to the request!", Toast.LENGTH_SHORT).show();
+                                                }
+                                            }
+                                        });
+
+
                                 alertDialog.dismiss();
                             }
                         });
@@ -260,6 +268,7 @@ RecyclerView recyclerView;
 
                 if (task.isSuccessful()) {
                     for (QueryDocumentSnapshot document : task.getResult()) {
+                        try{
                             if (!document.getData().get("senderId").equals(user.getId())) {
                                 String nameReqStr = document.getData().get("nameOfReqPerson").toString();
                                 String bloodGroup = document.getData().get("bloodGroup").toString();
@@ -267,9 +276,13 @@ RecyclerView recyclerView;
                                 String senderIdStr = document.getData().get("senderId").toString();
                                 String locationStr = document.getData().get("Location").toString();
                                 String coordStr = document.getData().get("LatLng").toString();
-                                BloodRequest bloodRequest = new BloodRequest(nameReqStr,bloodGroup,phoneNumberStr,senderIdStr,locationStr,fetchUserLocation(coordStr));
+                                BloodRequest bloodRequest = new BloodRequest(document.getId(),nameReqStr,bloodGroup,phoneNumberStr,senderIdStr,locationStr,fetchUserLocation(coordStr));
                                 requestList.add(bloodRequest);
                             }
+                        }catch(Exception e){
+                            e.printStackTrace();
+                        }
+
                     }
                     bloodRequestAdapter.notifyDataSetChanged();
                 }
