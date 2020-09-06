@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:mapbox="http://schemas.android.com/tools"
-    android:layout_margin="10dp"
+    android:layout_margin="8dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     app:cardCornerRadius="15dp">
 
@@ -28,8 +28,9 @@
                 android:layout_margin="15dp"
                 android:orientation="horizontal">
                 <ImageView
-                    android:layout_width="70dp"
-                    android:layout_height="70dp"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="center"
                     android:src="@drawable/ic_person"/>
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -41,16 +42,18 @@
                         android:textStyle="bold"
                         android:id="@+id/name"
                         android:text="Imran Khan"
-                        android:textSize="21dp"/>
+                        android:textSize="18dp"/>
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/blood_group"
+                        android:textSize="13sp"
                         android:text="Requesting: A+ Blood"/>
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/location"
+                        android:textSize="13sp"
                         android:text="Location: Doctor's Hospital, Lahore"/>
                 </LinearLayout>
             </LinearLayout>
@@ -62,14 +65,14 @@
                 mapbox:mapbox_cameraTargetLng="11.974560"
                 mapbox:mapbox_cameraZoom="10.5"
                 android:layout_width="match_parent"
-                android:layout_height="150dp"/>
+                android:layout_height="130dp"/>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="25dp"
                 android:layout_marginLeft="15dp"
                 android:layout_marginRight="15dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="10dp"
                 android:orientation="horizontal">
                 <Button
                     android:layout_width="0dp"
@@ -88,6 +91,7 @@
                     android:text="Accept Request"
                     android:background="@color/colorGreen"
                     android:layout_marginLeft="10dp"
+                    android:id="@+id/accept_req_btn"
                     android:layout_weight="1"/>
             </LinearLayout>
 

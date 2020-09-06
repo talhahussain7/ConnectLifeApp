@@ -3,11 +3,15 @@ package com.example.connectlife.fragments;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import android.os.Handler;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -27,7 +31,7 @@ import com.mapbox.mapboxsdk.geometry.LatLng;
 
 public class HomeFragment extends Fragment {
     TextView nameView,userLocation;
-    TextView livesSavedNum, requestsNum;
+    TextView donationsCount, requestsCount;
     User user;
 
     public HomeFragment() {
@@ -92,9 +96,9 @@ public class HomeFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
         nameView= view.findViewById(R.id.user_name);
         userLocation= view.findViewById(R.id.user_location);
-        requestsNum= view.findViewById(R.id.reqNum);
-        livesSavedNum=view.findViewById(R.id.livesSavedNum);
-
+        requestsCount= view.findViewById(R.id.reqNum);
+        donationsCount=view.findViewById(R.id.livesSavedNum);
+        setHasOptionsMenu(true);
 
 
         final DocumentReference docRef = FirebaseFirestore.getInstance().collection("users").document(FirebaseAuth.getInstance().getCurrentUser().getUid());
@@ -107,20 +111,20 @@ public class HomeFragment extends Fragment {
                 String city = documentSnapshot.get("city").toString();
                 String country = documentSnapshot.get("country").toString();
                 String dob = documentSnapshot.get("dob").toString();
-                String email = documentSnapshot.get("email").toString();
+                String bloodGroup = documentSnapshot.get("bloodGroup").toString();
                 LatLng coordinates = fetchUserLocation(documentSnapshot.get("LatLng").toString());
-                String livesSavedNumStr = documentSnapshot.get("donationsCount").toString();
-                String requestsNumStr = documentSnapshot.get("requestsCount").toString();
+                String  donationCountStr = documentSnapshot.get("donationsCount").toString();
+                String requestCountStr = documentSnapshot.get("requestsCount").toString();
 
 
                 city = city.substring(0,1).toUpperCase()+ city.substring(1);
                 country = country.substring(0,1).toUpperCase()+ country.substring(1);
 
-                user = new User(FirebaseAuth.getInstance().getCurrentUser().getUid(),name,city,country,coordinates,dob,phoneNumber,email);
+                user = new User(FirebaseAuth.getInstance().getCurrentUser().getUid(),name,city,country,coordinates,dob,phoneNumber,bloodGroup);
                 nameView.setText(user.getName());
                 userLocation.setText(user.getCity() +", "+user.getCountry());
-                livesSavedNum.setText(livesSavedNumStr);
-                requestsNum.setText(requestsNumStr);
+                donationsCount.setText(donationCountStr);
+                requestsCount.setText(requestCountStr);
 
             }
 
@@ -131,6 +135,25 @@ public class HomeFragment extends Fragment {
 
 
         return view;
+    }
+
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.home_frag_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.nav_notifications:
+                Toast.makeText(getContext(), "Notifications here.", Toast.LENGTH_SHORT).show();
+                break;
+
+
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     public LatLng fetchUserLocation(String coodinateStr){

@@ -12,6 +12,8 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
 
 import android.Manifest;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Geocoder;
@@ -32,6 +34,7 @@ import com.example.connectlife.fragments.MembersNearby;
 import com.example.connectlife.fragments.RequestsFragment;
 import com.example.connectlife.fragments.WelcomeFragments.AddRequestFragment;
 import com.example.connectlife.models.User;
+import com.example.connectlife.notificationPack.Token;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -46,6 +49,8 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
@@ -78,11 +83,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
         firebaseAuth = FirebaseAuth.getInstance();
         firebaseFirestore = FirebaseFirestore.getInstance();
-      userDocument = firebaseFirestore.collection("users").document(firebaseAuth.getCurrentUser().getUid());
-       Log.i("userId",firebaseAuth.getCurrentUser().getUid());
+        userDocument = firebaseFirestore.collection("users").document(firebaseAuth.getCurrentUser().getUid());
+        Log.i("userId",firebaseAuth.getCurrentUser().getUid());
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
         getLocation();
+
 
 
         Mapbox.getInstance(getApplicationContext(), getString(R.string.mapbox_access_token));
@@ -109,6 +115,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction().replace(R.id.main_container, new HomeFragment(), "Home Fragment").commit();
         }
+
+        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.O){
+            NotificationChannel channel = new NotificationChannel("MyNotifications","MyNotifications", NotificationManager.IMPORTANCE_DEFAULT);
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            manager.createNotificationChannel(channel);
+        }
+
+        FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                        if (!task.isSuccessful()) {
+                            Toast.makeText(getApplicationContext(), "getInstanceID failed", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        // Get new Instance ID token
+                        String token = task.getResult().getToken();
+                        Toast.makeText(getApplicationContext(), "GET new Instance ID Token", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+                 updateToken();
+
+
 
 
     }
@@ -217,6 +248,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
 
+
+
+    private void updateToken(){
+        FirebaseUser firebaseUser= FirebaseAuth.getInstance().getCurrentUser();
+        String refreshToken= FirebaseInstanceId.getInstance().getToken();
+        Map<String,Object> updateData = new HashMap<>();
+        updateData.put("token",refreshToken);
+        FirebaseFirestore.getInstance().collection("users").document(firebaseUser.getUid()).update(updateData).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Toast.makeText(MainActivity.this, "Token Updated!", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 
 
 

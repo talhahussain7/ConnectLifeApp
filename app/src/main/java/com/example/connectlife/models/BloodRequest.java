@@ -4,7 +4,7 @@ import com.mapbox.mapboxsdk.geometry.LatLng;
 
 public class BloodRequest {
 
-
+    String id;
     String name;
     String bloodGroup;
     String phoneNumber;
@@ -12,13 +12,22 @@ public class BloodRequest {
     String location;
     LatLng coordinates;
 
-    public BloodRequest(String name, String bloodGroup, String phoneNumber, String senderId, String location, LatLng coordinates) {
+    public BloodRequest(String id, String name, String bloodGroup, String phoneNumber, String senderId, String location, LatLng coordinates) {
+        this.id = id;
         this.name = name;
         this.bloodGroup = bloodGroup;
         this.phoneNumber = phoneNumber;
         this.senderId = senderId;
         this.location = location;
         this.coordinates = coordinates;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getName() {

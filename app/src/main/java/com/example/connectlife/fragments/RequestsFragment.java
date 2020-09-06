@@ -31,6 +31,11 @@ import com.example.connectlife.adapters.BloodRequestAdapter;
 import com.example.connectlife.fragments.WelcomeFragments.AddRequestFragment;
 import com.example.connectlife.models.BloodRequest;
 import com.example.connectlife.models.User;
+import com.example.connectlife.notificationPack.APIService;
+import com.example.connectlife.notificationPack.Client;
+import com.example.connectlife.notificationPack.Data;
+import com.example.connectlife.notificationPack.MyResponse;
+import com.example.connectlife.notificationPack.NotificationSender;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -40,12 +45,18 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.tapadoo.alerter.Alerter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class RequestsFragment extends Fragment {
 
@@ -55,6 +66,7 @@ User user;
 List<BloodRequest> requestList;
 BloodRequestAdapter bloodRequestAdapter;
 RecyclerView recyclerView;
+    APIService apiService = Client.getClient("https://fcm.googleapis.com/").create(APIService.class);
 
     public RequestsFragment() {
         // Required empty public constructor
@@ -79,11 +91,6 @@ RecyclerView recyclerView;
         firebaseFirestore = FirebaseFirestore.getInstance();
         requestList = new ArrayList<>();
         recyclerView = view.findViewById(R.id.recycler_view);
-        bloodRequestAdapter = new BloodRequestAdapter(getContext(),requestList);
-        recyclerView.setAdapter(bloodRequestAdapter);
-        populateRequests();
-
-
 
         final DocumentReference docRef =FirebaseFirestore.getInstance().collection("users").document(FirebaseAuth.getInstance().getCurrentUser().getUid());
         docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
@@ -96,7 +103,7 @@ RecyclerView recyclerView;
                     String city = documentSnapshot.get("city").toString();
                     String country = documentSnapshot.get("country").toString();
                     String dob = documentSnapshot.get("dob").toString();
-                    String email = documentSnapshot.get("email").toString();
+                    String bloodGroup = documentSnapshot.get("bloodGroup").toString();
                     String donationsCount = documentSnapshot.get("donationsCount").toString();
                     String requestsCount = documentSnapshot.get("requestsCount").toString();
                     LatLng coordinates = fetchUserLocation(documentSnapshot.get("LatLng").toString());
@@ -105,7 +112,7 @@ RecyclerView recyclerView;
                     city = city.substring(0,1).toUpperCase()+ city.substring(1);
                     country = country.substring(0,1).toUpperCase()+ country.substring(1);
 
-                    user = new User(firebaseAuth.getCurrentUser().getUid(),name,city,country,coordinates,dob,phoneNumber,email);
+                    user = new User(firebaseAuth.getCurrentUser().getUid(),name,city,country,coordinates,dob,phoneNumber,bloodGroup);
                 }catch (Exception e){
                     e.printStackTrace();
                 }
@@ -113,10 +120,9 @@ RecyclerView recyclerView;
             }
         });
 
-
-
-
-
+        bloodRequestAdapter = new BloodRequestAdapter(getContext(),requestList,getActivity());
+        recyclerView.setAdapter(bloodRequestAdapter);
+        populateRequests();
 
         return view;
     }
@@ -217,13 +223,50 @@ RecyclerView recyclerView;
                         dataPacket.put("LatLng",user.getCoordinates().getLatitude()+","+user.getCoordinates().getLongitude());
 
                         Toast.makeText(getContext(), dataPacket.toString(), Toast.LENGTH_SHORT).show();
-                        DocumentReference documentReference = firebaseFirestore.collection("bloodRequests").document();
+                        final DocumentReference documentReference = firebaseFirestore.collection("bloodRequests").document();
                         documentReference.set(dataPacket).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
+
+
+                               /* FirebaseMessaging.getInstance().subscribeToTopic(documentReference.getId())
+                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (!task.isSuccessful()) {
+                                                    Toast.makeText(getContext(), "Could not Subscribe to the request!", Toast.LENGTH_SHORT).show();
+                                                }
+                                            }
+                                        });*/
+                                firebaseFirestore.collection("users").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                        boolean exists = false;
+                                        if(task.isSuccessful()){
+                                            for(QueryDocumentSnapshot document :task.getResult()){
+                                                    if(!document.getId().equals(firebaseAuth.getCurrentUser().getUid())){
+                                                      //  Toast.makeText(getContext(), document.getId(), Toast.LENGTH_SHORT).show();
+                                                        String token = document.getData().get("token").toString();
+                                                        sendNotifications(token,"New Blood Request",s.getSelectedItem().toString() + " required urgently!");
+                                                    }else{
+                                                        Toast.makeText(getContext(), "I got skipped", Toast.LENGTH_SHORT).show();
+                                                    }
+                                            }
+                                        }
+                                    }
+
+                                });
+
                                 alertDialog.dismiss();
                             }
                         });
+
+
+
+
+
+
+
 
 
                     }
@@ -260,18 +303,25 @@ RecyclerView recyclerView;
 
                 if (task.isSuccessful()) {
                     for (QueryDocumentSnapshot document : task.getResult()) {
-                            if (!document.getData().get("senderId").equals(user.getId())) {
+                        try{
+                            if (!document.getData().get("senderId").equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
                                 String nameReqStr = document.getData().get("nameOfReqPerson").toString();
                                 String bloodGroup = document.getData().get("bloodGroup").toString();
                                 String phoneNumberStr = document.getData().get("phoneNumber").toString();
                                 String senderIdStr = document.getData().get("senderId").toString();
                                 String locationStr = document.getData().get("Location").toString();
                                 String coordStr = document.getData().get("LatLng").toString();
-                                BloodRequest bloodRequest = new BloodRequest(nameReqStr,bloodGroup,phoneNumberStr,senderIdStr,locationStr,fetchUserLocation(coordStr));
+                                BloodRequest bloodRequest = new BloodRequest(document.getId(),nameReqStr,bloodGroup,phoneNumberStr,senderIdStr,locationStr,fetchUserLocation(coordStr));
                                 requestList.add(bloodRequest);
                             }
+                        }catch(Exception e){
+                            e.printStackTrace();
+                        }
+
                     }
+
                     bloodRequestAdapter.notifyDataSetChanged();
+
                 }
             }
         });
@@ -291,6 +341,28 @@ RecyclerView recyclerView;
         double longitute = Double.valueOf(values[1]);
         LatLng coodinates = new LatLng(latitude,longitute);
         return coodinates;
+    }
+
+
+    public void sendNotifications(String usertoken, String title, String message) {
+        Data data = new Data(title, message);
+        NotificationSender sender = new NotificationSender(data, usertoken);
+
+        apiService.sendNotifcation(sender).enqueue(new Callback<MyResponse>() {
+            @Override
+            public void onResponse(Call<MyResponse> call, Response<MyResponse> response) {
+                if (response.code() == 200) {
+                    Toast.makeText(getContext(), "Sent!", Toast.LENGTH_SHORT).show();
+                }else {
+                    Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<MyResponse> call, Throwable t) {
+                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
 }

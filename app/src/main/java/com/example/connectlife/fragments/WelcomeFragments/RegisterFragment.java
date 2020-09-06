@@ -12,8 +12,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.example.connectlife.MainActivity;
@@ -48,7 +50,8 @@ public class RegisterFragment extends Fragment {
     PhoneAuthProvider.ForceResendingToken token;
     Button RegisterBtn,signInButton;
     boolean verificationInProgress = false;
-    EditText phoneField,nameField,cityField,countryField,dobField,emailField ,otpField;
+    EditText phoneField,nameField,cityField,countryField,dobField ,otpField;
+    Spinner bloodGroupSpinner;
     CountryCodePicker ccp;
     View phoneLayout;
     Activity activity;
@@ -90,12 +93,21 @@ public class RegisterFragment extends Fragment {
         cityField=view.findViewById(R.id.city_field);
         countryField=view.findViewById(R.id.country_field);
         dobField=view.findViewById(R.id.dob_field);
-        emailField=view.findViewById(R.id.email_field);
+        bloodGroupSpinner = view.findViewById(R.id.blood_group_selector);
         signInButton = view.findViewById(R.id.sign_in_btn);
 
         otpField=view.findViewById(R.id.otp_field);
         ccp = (CountryCodePicker) view.findViewById(R.id.ccp);
         phoneLayout=view.findViewById(R.id.phoneLayout);
+
+
+        final String[] arraySpinner = new String[] {
+                "A+","A-","B+","B-","AB+","AB-","O+","O-","OH+","Other"
+        };
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(),
+                android.R.layout.simple_spinner_item, arraySpinner);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        bloodGroupSpinner.setAdapter(adapter);
 
         signInButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -108,15 +120,13 @@ public class RegisterFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
-                String name,phoneNumber,country, city,dob,email ;
-                name="";
+                String phoneNumber;
+
                 phoneNumber="";
-                dob="";
-                country="";
-                city="";
 
 
-                if(!(isNameValid()&&isAddressValid()&&isDobValid()&&isEmailValid()&&isPhoneValid())){
+
+                if(!(isNameValid()&&isAddressValid()&&isDobValid()&&isPhoneValid())){
                 Alerter.create(activity)
                         .setTitle("Missing Fields!")
                         .setText("All Fields are mandatory!")
@@ -218,8 +228,9 @@ public class RegisterFragment extends Fragment {
                     userInfo.put("city",cityField.getText().toString());
                     userInfo.put("country",countryField.getText().toString());
                     userInfo.put("dob",dobField.getText().toString());
-                    userInfo.put("email",emailField.getText().toString());
+                    userInfo.put("bloodGroup",bloodGroupSpinner.getSelectedItem().toString());
                     userInfo.put("LatLng","0,0");
+                    userInfo.put("token","");
                     userInfo.put("requestsCount","0");
                     userInfo.put("donationsCount","0");
                     userInfo.put("phoneNumber",ccp.getFullNumberWithPlus()+phoneField.getText().toString());
@@ -252,9 +263,12 @@ public class RegisterFragment extends Fragment {
     public boolean isDobValid(){
         return !TextUtils.isEmpty(dobField.getText().toString());
     }
-    public boolean isEmailValid(){
+
+
+    /*public boolean isEmailValid(){
         return !TextUtils.isEmpty(emailField.getText().toString());
-    }
+    }*/
+
     public boolean isPhoneValid(){
         return !TextUtils.isEmpty(phoneField.getText().toString());
     }
@@ -281,6 +295,7 @@ public class RegisterFragment extends Fragment {
                                 .setBackgroundColorRes(R.color.colorPrimaryDark)
                                 .show();
                     }else{
+
                         sendVerificationCodeToUser(phoneNumber);
 
                     }
