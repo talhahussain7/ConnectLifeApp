@@ -80,11 +80,6 @@ RecyclerView recyclerView;
         firebaseFirestore = FirebaseFirestore.getInstance();
         requestList = new ArrayList<>();
         recyclerView = view.findViewById(R.id.recycler_view);
-        bloodRequestAdapter = new BloodRequestAdapter(getContext(),requestList);
-        recyclerView.setAdapter(bloodRequestAdapter);
-        populateRequests();
-
-
 
         final DocumentReference docRef =FirebaseFirestore.getInstance().collection("users").document(FirebaseAuth.getInstance().getCurrentUser().getUid());
         docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
@@ -113,6 +108,10 @@ RecyclerView recyclerView;
 
             }
         });
+
+        bloodRequestAdapter = new BloodRequestAdapter(getContext(),requestList,getActivity());
+        recyclerView.setAdapter(bloodRequestAdapter);
+        populateRequests();
 
         return view;
     }
@@ -269,7 +268,7 @@ RecyclerView recyclerView;
                 if (task.isSuccessful()) {
                     for (QueryDocumentSnapshot document : task.getResult()) {
                         try{
-                            if (!document.getData().get("senderId").equals(user.getId())) {
+                            if (!document.getData().get("senderId").equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
                                 String nameReqStr = document.getData().get("nameOfReqPerson").toString();
                                 String bloodGroup = document.getData().get("bloodGroup").toString();
                                 String phoneNumberStr = document.getData().get("phoneNumber").toString();
@@ -284,7 +283,9 @@ RecyclerView recyclerView;
                         }
 
                     }
+
                     bloodRequestAdapter.notifyDataSetChanged();
+
                 }
             }
         });

@@ -1,5 +1,8 @@
 package com.example.connectlife.services;
 
+import android.util.Log;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -13,7 +16,9 @@ public class MessagingService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
-        showNotification(remoteMessage.getNotification().getTitle(),remoteMessage.getNotification().getBody());
+            //showNotification(remoteMessage.getNotification().getTitle(),remoteMessage.getNotification().getBody());
+        showNotification(remoteMessage.getData().get("Title"),remoteMessage.getData().get("Message"));
+        //Log.i("Message",remoteMessage.getData().toString());
     }
 
     public  void showNotification(String title,String message){
@@ -29,5 +34,11 @@ public class MessagingService extends FirebaseMessagingService {
     @Override
     public void onNewToken(@NonNull String s) {
         super.onNewToken(s);
+    }
+
+    @Override
+    public void onMessageSent(@NonNull String s) {
+        super.onMessageSent(s);
+
     }
 }

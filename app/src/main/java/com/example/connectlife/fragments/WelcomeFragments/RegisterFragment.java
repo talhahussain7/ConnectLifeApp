@@ -230,6 +230,7 @@ public class RegisterFragment extends Fragment {
                     userInfo.put("dob",dobField.getText().toString());
                     userInfo.put("bloodGroup",bloodGroupSpinner.getSelectedItem().toString());
                     userInfo.put("LatLng","0,0");
+                    userInfo.put("token","");
                     userInfo.put("requestsCount","0");
                     userInfo.put("donationsCount","0");
                     userInfo.put("phoneNumber",ccp.getFullNumberWithPlus()+phoneField.getText().toString());
@@ -294,6 +295,7 @@ public class RegisterFragment extends Fragment {
                                 .setBackgroundColorRes(R.color.colorPrimaryDark)
                                 .show();
                     }else{
+
                         sendVerificationCodeToUser(phoneNumber);
 
                     }
