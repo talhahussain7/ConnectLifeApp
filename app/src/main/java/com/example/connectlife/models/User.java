@@ -12,14 +12,23 @@ public class User {
     LatLng coordinates;
     String dob;
     String phoneNumber;
-    String email;
+    String bloodGroup;
+    String docRef;
+
+    public String getDocRef() {
+        return docRef;
+    }
+
+    public void setDocRef(String docRef) {
+        this.docRef = docRef;
+    }
+
     //Address address;
-    //String bloodGroup;
     //List<BloodRequest> list;
     //String status;
 
 
-    public User(String id, String name, String city, String country, LatLng coordinates, String dob, String phoneNumber, String email) {
+    public User(String id, String name, String city, String country, LatLng coordinates, String dob, String phoneNumber, String bloodGroup, String docRef) {
         this.id = id;
         this.name = name;
         this.city = city;
@@ -27,7 +36,8 @@ public class User {
         this.coordinates = coordinates;
         this.dob = dob;
         this.phoneNumber = phoneNumber;
-        this.email = email;
+        this.bloodGroup = bloodGroup;
+        this.docRef = docRef;
     }
 
     public String getId() {
@@ -86,11 +96,11 @@ public class User {
         this.phoneNumber = phoneNumber;
     }
 
-    public String getEmail() {
-        return email;
+    public String getBloodGroup() {
+        return bloodGroup;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setBloodGroup(String bloodGroup) {
+        this.bloodGroup = bloodGroup;
     }
 }
