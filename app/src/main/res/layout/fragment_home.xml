@@ -127,6 +127,7 @@
 
     </RelativeLayout>
 <androidx.cardview.widget.CardView
+    android:id="@+id/verifyCard"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     app:cardCornerRadius="15dp"
@@ -163,6 +164,7 @@ blood or medical report"/>
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Browse"
+            android:id="@+id/browseButton"
             android:textAllCaps="true"
             android:background="@color/colorPrimary"
             android:textColor="@android:color/white"/>

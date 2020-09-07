@@ -151,11 +151,6 @@ public class BloodRequestAdapter extends RecyclerView.Adapter<BloodRequestAdapte
             }
         });
 
-
-
-
-
-
     }
 
     @Override
