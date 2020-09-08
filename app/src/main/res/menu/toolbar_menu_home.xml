@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_more"
+        android:icon="@drawable/baseline_more_horiz_24"
+        android:title=""
+        android:iconTint="@android:color/white"
+        app:showAsAction="always">
+        <menu>
+            <item android:id="@+id/action_donate"
+                android:title="Donate "
+                android:icon="@drawable/ic_baseline_attach_money_24"
+                app:showAsAction="ifRoom"/>
+
+            <item android:id="@+id/action_about"
+                android:title="About this Application "
+                android:icon="@drawable/ic_info_outline_24dp"
+                app:showAsAction="ifRoom"/>
+            <item
+                android:id="@+id/action_signout"
+                android:icon="@drawable/ic_baseline_call_missed_outgoing_24"
+                android:title=" Sign out"
+                android:iconTint="@android:color/white"
+                app:showAsAction="ifRoom" />
+
+            <item
+                android:id="@+id/action_delete"
+                android:icon="@drawable/ic_baseline_delete_24"
+                android:title=" Delete Account"
+                android:iconTint="@android:color/white"
+                app:showAsAction="ifRoom" />
+
+
+
+        </menu>
+
+    </item>
+
+
+
+</menu>
+
+
+
+
+

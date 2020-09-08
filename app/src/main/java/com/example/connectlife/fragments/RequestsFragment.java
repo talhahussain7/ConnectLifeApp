@@ -93,35 +93,7 @@ RecyclerView recyclerView;
         recyclerView = view.findViewById(R.id.recycler_view);
 
         final DocumentReference docRef =FirebaseFirestore.getInstance().collection("users").document(FirebaseAuth.getInstance().getCurrentUser().getUid());
-        docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-
-                try {
-                    String name = documentSnapshot.get("name").toString();
-                    String phoneNumber = documentSnapshot.get("phoneNumber").toString();
-                    String city = documentSnapshot.get("city").toString();
-                    String country = documentSnapshot.get("country").toString();
-                    String dob = documentSnapshot.get("dob").toString();
-                    String bloodGroup = documentSnapshot.get("bloodGroup").toString();
-                    String donationsCount = documentSnapshot.get("donationsCount").toString();
-                    String requestsCount = documentSnapshot.get("requestsCount").toString();
-                    LatLng coordinates = fetchUserLocation(documentSnapshot.get("LatLng").toString());
-                    String docRef = "";
-                    if(documentSnapshot.get("docRef").toString()!=null){
-                        docRef = documentSnapshot.get("docRef").toString();
-                    }
-
-                    city = city.substring(0,1).toUpperCase()+ city.substring(1);
-                    country = country.substring(0,1).toUpperCase()+ country.substring(1);
-
-                    user = new User(firebaseAuth.getCurrentUser().getUid(),name,city,country,coordinates,dob,phoneNumber,bloodGroup, docRef);
-                }catch (Exception e){
-                    e.printStackTrace();
-                }
-
-            }
-        });
+        getUserDetails();
 
         bloodRequestAdapter = new BloodRequestAdapter(getContext(),requestList,getActivity());
         recyclerView.setAdapter(bloodRequestAdapter);
@@ -192,44 +164,53 @@ RecyclerView recyclerView;
                 submitBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        String nameStr = user.getName();
-                        String phoneNumberStr = user.getPhoneNumber();
-
-                        if(onBehalfCheck.isChecked()){
 
 
-                            if(isValid(nameField)&& isValid(phoneField)){
-                                 nameStr = nameField.getText().toString();
-                                 phoneNumberStr = phoneField.getText().toString();
+                            String nameStr = "";
+                            String phoneNumberStr = "";
+                            try{
+                                nameStr = user.getName();
+                                phoneNumberStr = user.getPhoneNumber();
+                            }catch (Exception e){
+
+                            }
+
+
+                            if(onBehalfCheck.isChecked()){
+
+
+                                if(isValid(nameField)&& isValid(phoneField)){
+                                    nameStr = nameField.getText().toString();
+                                    phoneNumberStr = phoneField.getText().toString();
 
 
 
-                            }else{
-                                if(!isValid(nameField)){
-                                    nameField.setError("Name Field is Mandatory!");
+                                }else{
+                                    if(!isValid(nameField)){
+                                        nameField.setError("Name Field is Mandatory!");
+                                    }
+                                    if (!isValid(phoneField)){
+                                        phoneField.setError("Phone Number is required!");
+                                    }
+                                    return;
+
                                 }
-                                if (!isValid(phoneField)){
-                                phoneField.setError("Phone Number is required!");
                             }
-                                return;
-
-                            }
-                        }
 
 
-                        Map<String,String> dataPacket = new HashMap<>();
-                        dataPacket.put("nameOfReqPerson",nameStr);
-                        dataPacket.put("phoneNumber",phoneNumberStr);
-                        dataPacket.put("bloodGroup",s.getSelectedItem().toString());
-                        dataPacket.put("senderId",user.getId());
-                        dataPacket.put("Location",user.getCity()+", "+user.getCountry());
-                        dataPacket.put("LatLng",user.getCoordinates().getLatitude()+","+user.getCoordinates().getLongitude());
+                            Map<String,String> dataPacket = new HashMap<>();
+                            dataPacket.put("nameOfReqPerson",nameStr);
+                            dataPacket.put("phoneNumber",phoneNumberStr);
+                            dataPacket.put("bloodGroup",s.getSelectedItem().toString());
+                            dataPacket.put("senderId",user.getId());
+                            dataPacket.put("Location",user.getCity()+", "+user.getCountry());
+                            dataPacket.put("LatLng",user.getCoordinates().getLatitude()+","+user.getCoordinates().getLongitude());
 
-                        Toast.makeText(getContext(), dataPacket.toString(), Toast.LENGTH_SHORT).show();
-                        final DocumentReference documentReference = firebaseFirestore.collection("bloodRequests").document();
-                        documentReference.set(dataPacket).addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
+                            Toast.makeText(getContext(), dataPacket.toString(), Toast.LENGTH_SHORT).show();
+                            final DocumentReference documentReference = firebaseFirestore.collection("bloodRequests").document();
+                            documentReference.set(dataPacket).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
 
 
                                /* FirebaseMessaging.getInstance().subscribeToTopic(documentReference.getId())
@@ -241,34 +222,28 @@ RecyclerView recyclerView;
                                                 }
                                             }
                                         });*/
-                                firebaseFirestore.collection("users").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                        boolean exists = false;
-                                        if(task.isSuccessful()){
-                                            for(QueryDocumentSnapshot document :task.getResult()){
+                                    firebaseFirestore.collection("users").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                            boolean exists = false;
+                                            if(task.isSuccessful()){
+                                                for(QueryDocumentSnapshot document :task.getResult()){
                                                     if(!document.getId().equals(firebaseAuth.getCurrentUser().getUid())){
-                                                      //  Toast.makeText(getContext(), document.getId(), Toast.LENGTH_SHORT).show();
+                                                        //  Toast.makeText(getContext(), document.getId(), Toast.LENGTH_SHORT).show();
                                                         String token = document.getData().get("token").toString();
                                                         sendNotifications(token,"New Blood Request",s.getSelectedItem().toString() + " required urgently!");
                                                     }else{
                                                         Toast.makeText(getContext(), "I got skipped", Toast.LENGTH_SHORT).show();
                                                     }
+                                                }
                                             }
                                         }
-                                    }
 
-                                });
+                                    });
 
-                                alertDialog.dismiss();
-                            }
-                        });
-
-
-
-
-
-
+                                    alertDialog.dismiss();
+                                }
+                            });
 
 
 
@@ -366,6 +341,42 @@ RecyclerView recyclerView;
                 Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+
+    public boolean getUserDetails(){
+        final DocumentReference docRef =FirebaseFirestore.getInstance().collection("users").document(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                try {
+                    String name = documentSnapshot.get("name").toString();
+                    String phoneNumber = documentSnapshot.get("phoneNumber").toString();
+                    String city = documentSnapshot.get("city").toString();
+                    String country = documentSnapshot.get("country").toString();
+                    String dob = documentSnapshot.get("dob").toString();
+                    String bloodGroup = documentSnapshot.get("bloodGroup").toString();
+                    String donationsCount = documentSnapshot.get("donationsCount").toString();
+                    String requestsCount = documentSnapshot.get("requestsCount").toString();
+                    LatLng coordinates = fetchUserLocation(documentSnapshot.get("LatLng").toString());
+                    String docRef = "";
+                    if(documentSnapshot.get("docRef").toString()!=null){
+                        docRef = documentSnapshot.get("docRef").toString();
+                    }
+
+                    city = city.substring(0,1).toUpperCase()+ city.substring(1);
+                    country = country.substring(0,1).toUpperCase()+ country.substring(1);
+
+                    user = new User(firebaseAuth.getCurrentUser().getUid(),name,city,country,coordinates,dob,phoneNumber,bloodGroup, docRef);
+
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+
+            }
+
+        });
+        return true;
     }
 
 }
