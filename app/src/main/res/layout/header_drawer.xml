@@ -1,7 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="176dp"
     android:background="@drawable/gradient_bg">
 
-</LinearLayout>
+        <RelativeLayout
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/top_container"
+            android:layout_marginTop="30dp">
+
+
+            <ImageButton
+                android:layout_width="19dp"
+                android:layout_height="19dp"
+                android:src="@drawable/ic_baseline_edit_24"
+                android:layout_alignParentEnd="true"
+                android:padding="2dp"
+                android:id="@+id/profile_edit_name"
+                android:background="@android:color/transparent"
+                android:layout_alignParentRight="true" />
+            <ImageButton
+                android:layout_width="19dp"
+                android:layout_height="19dp"
+                android:layout_toLeftOf="@id/profile_edit_name"
+                android:padding="2dp"
+                android:id="@+id/profile_edit_location"
+                android:src="@drawable/ic_baseline_edit_location_24"
+                android:layout_marginRight="20dp"
+                android:background="@android:color/transparent"
+                />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="20dp"
+            android:layout_marginLeft="15dp"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_centerHorizontal="true"
+                android:src="@drawable/ic_baseline_person_24"
+                android:background="@drawable/circle_solid" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/user_name_text"
+                android:text="Talha Hussain"
+                android:layout_marginTop="5dp"
+                android:layout_below="@id/imageView"
+                android:textColor="@android:color/white"
+                />
+        </RelativeLayout>
+
+
+
+
+
+</RelativeLayout>

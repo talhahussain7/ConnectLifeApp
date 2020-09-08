@@ -29,6 +29,7 @@ import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.connectlife.fragments.AboutFragment;
 import com.example.connectlife.fragments.HomeFragment;
 import com.example.connectlife.fragments.MembersNearby;
 import com.example.connectlife.fragments.RequestsFragment;
@@ -74,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     FirebaseAuth firebaseAuth;
     DocumentReference userDocument;
     public static User currentUser;
+    public static FragmentManager fragmentManager;
 
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -83,6 +85,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
         firebaseAuth = FirebaseAuth.getInstance();
         firebaseFirestore = FirebaseFirestore.getInstance();
+        fragmentManager = getSupportFragmentManager();
         userDocument = firebaseFirestore.collection("users").document(firebaseAuth.getCurrentUser().getUid());
         Log.i("userId",firebaseAuth.getCurrentUser().getUid());
 
@@ -192,27 +195,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 fragmentTitle.setText("Members Nearby");
                 getSupportFragmentManager().beginTransaction().replace(R.id.main_container,new MembersNearby(),"Members Nearby Fragment").commit();
                 break;
-            case R.id.nav_delete_acc:
-                final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-                if(user!=null){
-                    userDocument.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            if(task.isSuccessful()){
-                                Toast.makeText(getApplicationContext(), "User Deleted", Toast.LENGTH_SHORT).show();
-                                firebaseAuth.signOut();
-                                startActivity(new Intent(MainActivity.this,WelcomeActivity.class));
-                                finish();
-                            }else {
-                                Toast.makeText(getApplicationContext(), "User Deletion failed", Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    });
-
-                }else{
-                    Toast.makeText(getApplicationContext(), "User Deletion failed: USER IS NULL", Toast.LENGTH_SHORT).show();
-                }
 
 
             case R.id.nav_signout:
@@ -264,7 +247,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
 
+    public static void showAboutApplicationFragment(){
+        fragmentTitle.setText("About Application");
+        fragmentManager.beginTransaction().replace(R.id.main_container,new AboutFragment(),"About Fragment").commit();
+    }
 
+    public static void showHomeFragment(){
+        fragmentTitle.setText(R.string.app_name);
+        fragmentManager.beginTransaction().replace(R.id.main_container,new HomeFragment(),"Home Fragment").commit();
+    }
 
+    @Override
+    public void onBackPressed() {
 
+    }
 }

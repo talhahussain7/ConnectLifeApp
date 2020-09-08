@@ -28,7 +28,9 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.connectlife.MainActivity;
 import com.example.connectlife.R;
+import com.example.connectlife.WelcomeActivity;
 import com.example.connectlife.models.User;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -49,7 +51,7 @@ import java.util.Map;
 public class HomeFragment extends Fragment {
     TextView nameView,userLocation;
     TextView donationsCount, requestsCount;
-    Button browseButton;
+    Button browseButton,inviteButton;
     User user;
     //private Uri filePath;
     FirebaseStorage storage;
@@ -58,6 +60,7 @@ public class HomeFragment extends Fragment {
     int verified = 0;
     final static int PICK_PDF_CODE = 2342;
 
+
     public HomeFragment() {
         // Required empty public constructor
     }
@@ -65,9 +68,7 @@ public class HomeFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(savedInstanceState== null){
-
-            final Handler handler = new Handler();
+           /* final Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -105,9 +106,7 @@ public class HomeFragment extends Fragment {
                     alertDialog.show();
 
                 }
-            }, 500);
-
-        }
+            }, 500);*/
 
     }
 
@@ -124,7 +123,16 @@ public class HomeFragment extends Fragment {
         storageReference = storage.getReference();
         browseButton = view.findViewById(R.id.browseButton);
         verifyCard = view.findViewById(R.id.verifyCard);
+        inviteButton = view.findViewById(R.id.invite_btn);
         setHasOptionsMenu(true);
+
+
+        inviteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                inviteUsers();
+            }
+        });
 
         browseButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -173,15 +181,25 @@ public class HomeFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.home_frag_menu, menu);
+        inflater.inflate(R.menu.toolbar_menu_home, menu);
         super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()){
-            case R.id.nav_notifications:
-                Toast.makeText(getContext(), "Notifications here.", Toast.LENGTH_SHORT).show();
+            case R.id.action_about:
+                MainActivity.showAboutApplicationFragment();
+                break;
+
+            case R.id.action_signout:
+                FirebaseAuth.getInstance().signOut();
+                startActivity(new Intent(getContext(), WelcomeActivity.class));
+                break;
+
+            case R.id.action_delete:
+                // TO be added later, just to avoid mistakingly deleting the account for now.
+                Toast.makeText(getContext(), "Delete Account", Toast.LENGTH_SHORT).show();
                 break;
 
 
@@ -285,5 +303,18 @@ public class HomeFragment extends Fragment {
                 verifyCard.setVisibility(View.GONE);
             }
         });
+    }
+
+    public void inviteUsers(){
+        try{
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            shareIntent.setType("text/plain");
+            shareIntent.putExtra(Intent.EXTRA_SUBJECT,getString(R.string.app_name));
+            String shareMessage = "http://play.google.com/store/apps/details?id="+ getContext().getPackageName();
+            shareIntent.putExtra(Intent.EXTRA_TEXT,shareMessage);
+            startActivity(Intent.createChooser(shareIntent,"Share with"));
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 }
