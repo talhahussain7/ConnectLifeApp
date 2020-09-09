@@ -235,6 +235,7 @@ public class RegisterFragment extends Fragment {
                     userInfo.put("donationsCount","0");
                     userInfo.put("phoneNumber",ccp.getFullNumberWithPlus()+phoneField.getText().toString());
                     userInfo.put("docRef","");
+                    userInfo.put("imgRef","");
                 UID= fAuth.getCurrentUser().getUid();
                 DocumentReference documentReference = firebaseFirestore.collection("users").document(UID);
                 documentReference.set(userInfo).addOnSuccessListener(new OnSuccessListener<Void>() {

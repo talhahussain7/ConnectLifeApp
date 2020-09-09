@@ -21,6 +21,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -91,6 +92,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
         getLocation();
+
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+
+        StrictMode.setThreadPolicy(policy);
 
 
 

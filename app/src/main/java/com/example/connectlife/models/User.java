@@ -15,6 +15,16 @@ public class User {
     String bloodGroup;
     String docRef;
 
+    public String getImgRef() {
+        return imgRef;
+    }
+
+    public void setImgRef(String imgRef) {
+        this.imgRef = imgRef;
+    }
+
+    String imgRef;
+
     public String getDocRef() {
         return docRef;
     }
@@ -28,7 +38,7 @@ public class User {
     //String status;
 
 
-    public User(String id, String name, String city, String country, LatLng coordinates, String dob, String phoneNumber, String bloodGroup, String docRef) {
+    public User(String id, String name, String city, String country, LatLng coordinates, String dob, String phoneNumber, String bloodGroup, String docRef, String imgRef) {
         this.id = id;
         this.name = name;
         this.city = city;
@@ -38,6 +48,7 @@ public class User {
         this.phoneNumber = phoneNumber;
         this.bloodGroup = bloodGroup;
         this.docRef = docRef;
+        this.imgRef = imgRef;
     }
 
     public String getId() {
