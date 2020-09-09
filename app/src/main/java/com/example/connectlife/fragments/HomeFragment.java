@@ -1,9 +1,14 @@
 package com.example.connectlife.fragments;
 
 import android.Manifest;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -16,6 +21,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -23,8 +29,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,6 +52,9 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,13 +63,16 @@ public class HomeFragment extends Fragment {
     TextView nameView,userLocation;
     TextView donationsCount, requestsCount;
     Button browseButton,inviteButton;
+    ImageButton addProfilePicture;
+    ImageView profilePicture;
+    String imgRef="";
     User user;
-    //private Uri filePath;
     FirebaseStorage storage;
     StorageReference storageReference;
     CardView verifyCard;
     int verified = 0;
     final static int PICK_PDF_CODE = 2342;
+    final static int PICK_IMAGE_CODE = 71;
 
 
     public HomeFragment() {
@@ -124,6 +138,8 @@ public class HomeFragment extends Fragment {
         browseButton = view.findViewById(R.id.browseButton);
         verifyCard = view.findViewById(R.id.verifyCard);
         inviteButton = view.findViewById(R.id.invite_btn);
+        addProfilePicture = view.findViewById(R.id.addPictureButton);
+        profilePicture = view.findViewById(R.id.profilePicture);
         setHasOptionsMenu(true);
 
 
@@ -138,6 +154,29 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 getDoc();
+            }
+        });
+
+        addProfilePicture.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getProfilePicture();
+            }
+        });
+
+        profilePicture.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final Dialog nagDialog = new Dialog(getActivity(),android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
+                nagDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                nagDialog.setCancelable(false);
+                nagDialog.setContentView(R.layout.dialogue_fullscreen);
+                nagDialog.setCancelable(true);
+                ImageView fsImage = nagDialog.findViewById(R.id.fsImage);
+                BitmapDrawable drawable = (BitmapDrawable) profilePicture.getDrawable();
+                Bitmap bitmap = drawable.getBitmap();
+                fsImage.setImageBitmap(bitmap);
+                nagDialog.show();
             }
         });
 
@@ -157,13 +196,29 @@ public class HomeFragment extends Fragment {
                 String  donationCountStr = documentSnapshot.get("donationsCount").toString();
                 String requestCountStr = documentSnapshot.get("requestsCount").toString();
                 String docRef = "";
-                if(documentSnapshot.get("docRef")!=null){
+                imgRef = "";
+                if(documentSnapshot.get("docRef")!=null&&!documentSnapshot.get("docRef").toString().equalsIgnoreCase("")){
                     docRef = documentSnapshot.get("docRef").toString();
                     verified=1;
+                    verifyCard.setVisibility(View.GONE);
                 }
+                if(documentSnapshot.get("imgRef")!=null&&!documentSnapshot.get("imgRef").toString().equalsIgnoreCase("")){
+                    imgRef = documentSnapshot.get("imgRef").toString();
+                    Handler handler = new Handler();
+                    Runnable r = new Runnable() {
+                        public void run() {
+                            Bitmap bitmap = getBitmapFromURL(imgRef);
+                            Bitmap resizedBitmap = getResizedBitmap(bitmap, 1024, 1024);
+                            profilePicture.setImageBitmap(resizedBitmap);
+                        }
+                    };
+                    handler.postDelayed(r, 10);
+
+                }
+
                 city = city.substring(0,1).toUpperCase()+ city.substring(1);
                 country = country.substring(0,1).toUpperCase()+ country.substring(1);
-                user = new User(FirebaseAuth.getInstance().getCurrentUser().getUid(),name,city,country,coordinates,dob,phoneNumber,bloodGroup,docRef);
+                user = new User(FirebaseAuth.getInstance().getCurrentUser().getUid(),name,city,country,coordinates,dob,phoneNumber,bloodGroup,docRef,imgRef);
                 nameView.setText(user.getName());
                 userLocation.setText(user.getCity() +", "+user.getCountry());
                 donationsCount.setText(donationCountStr);
@@ -240,15 +295,31 @@ public class HomeFragment extends Fragment {
         if (requestCode == PICK_PDF_CODE && resultCode == getActivity().RESULT_OK && data != null && data.getData() != null) {
             //if a file is selected
             if (data.getData() != null) {
-                //uploading the file
-                uploadDoc(data.getData());
+
+                uploadDoc(data.getData(), "userDocuments/");
             }else{
                 Toast.makeText(getContext(), "No file chosen", Toast.LENGTH_SHORT).show();
             }
+        } else if(requestCode == PICK_IMAGE_CODE && resultCode == getActivity().RESULT_OK && data != null && data.getData() != null){
+            if (data.getData() != null) {
+                try {
+                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), data.getData());
+                    Bitmap resizedBitmap = getResizedBitmap(bitmap, 1024, 1024);
+                    profilePicture.setImageBitmap(resizedBitmap);
+                }
+                catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+                uploadDoc(data.getData(), "userProfilePhotos/");
+            }else{
+                Toast.makeText(getContext(), "No image chosen", Toast.LENGTH_SHORT).show();
+            }
         }
+
     }
 
-    private void uploadDoc(Uri filePath) {
+    private void uploadDoc(Uri filePath, String folder) {
 
         if(filePath != null)
         {
@@ -256,14 +327,14 @@ public class HomeFragment extends Fragment {
             progressDialog.setTitle("Uploading...");
             progressDialog.show();
 
-            StorageReference ref = storageReference.child("userDocuments/"+ FirebaseAuth.getInstance().getCurrentUser().getUid());
+            StorageReference ref = storageReference.child(folder+ FirebaseAuth.getInstance().getCurrentUser().getUid());
             ref.putFile(filePath)
                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                             progressDialog.dismiss();
                             Toast.makeText(getContext(), "Uploaded", Toast.LENGTH_SHORT).show();
-                            updateUrl();
+                            updateUrl(folder);
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
@@ -284,23 +355,28 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    private void updateUrl(){
+    private void updateUrl(final String folder){
         // Points to the root reference
         StorageReference storageRef = FirebaseStorage.getInstance().getReference();
-        StorageReference dateRef = storageRef.child("userDocuments/" + FirebaseAuth.getInstance().getCurrentUser().getUid());
+        StorageReference dateRef = storageRef.child(folder + FirebaseAuth.getInstance().getCurrentUser().getUid());
         dateRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>()
         {
             @Override
             public void onSuccess(Uri downloadUrl)
             {
-                Map<String,String> userMap = new HashMap<>();
-                userMap.put("docRef",downloadUrl.toString());
+                if(folder.equalsIgnoreCase("userDocuments/")){
                 FirebaseFirestore.getInstance().collection("users")
                         .document(FirebaseAuth.getInstance().getCurrentUser().getUid())
                         .update("docRef", downloadUrl.toString());
                 user.setDocRef(downloadUrl.toString());
                 verified=1;
-                verifyCard.setVisibility(View.GONE);
+                verifyCard.setVisibility(View.GONE);}
+                else if(folder.equalsIgnoreCase("userProfilePhotos/")){
+                    FirebaseFirestore.getInstance().collection("users")
+                            .document(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                            .update("imgRef", downloadUrl.toString());
+                    user.setImgRef(downloadUrl.toString());
+                }
             }
         });
     }
@@ -317,4 +393,59 @@ public class HomeFragment extends Fragment {
             e.printStackTrace();
         }
     }
+
+    public void getProfilePicture(){
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ContextCompat.checkSelfPermission(getContext(),
+                Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                    Uri.parse("package:" + getActivity().getPackageName()));
+            startActivity(intent);
+            return;
+        }
+
+//        Intent intent = new Intent();
+//        intent.setType("image/*");
+//        intent.setAction(Intent.ACTION_GET_CONTENT);
+//        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_CODE);
+
+        Intent pickPhoto = new Intent(Intent.ACTION_PICK,
+                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(pickPhoto , PICK_IMAGE_CODE);
+    }
+
+    public Bitmap getBitmapFromURL(String src) {
+        try {
+            java.net.URL url = new java.net.URL(src);
+            HttpURLConnection connection = (HttpURLConnection) url
+                    .openConnection();
+            connection.setDoInput(true);
+            connection.connect();
+            InputStream input = connection.getInputStream();
+            Bitmap myBitmap = BitmapFactory.decodeStream(input);
+            return myBitmap;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public Bitmap getResizedBitmap(Bitmap bm, int newHeight, int newWidth) {
+        int width = bm.getWidth();
+        int height = bm.getHeight();
+        float scaleWidth = ((float) newWidth) / width;
+        float scaleHeight = ((float) newHeight) / height;
+        // CREATE A MATRIX FOR THE MANIPULATION
+        Matrix matrix = new Matrix();
+        // RESIZE THE BIT MAP
+        matrix.postScale(scaleWidth, scaleHeight);
+
+        // "RECREATE" THE NEW BITMAP
+        Bitmap resizedBitmap = Bitmap.createBitmap(bm, 0, 0, width, height,
+                matrix, false);
+
+        return resizedBitmap;
+    }
+
 }

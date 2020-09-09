@@ -28,12 +28,14 @@
                     android:layout_width="100dp"
                     android:layout_height="100dp">
                     <ImageView
+                        android:id="@+id/profilePicture"
                         android:layout_width="100dp"
                         android:layout_height="100dp"
                         android:background="@drawable/white_bg"
                         android:src="@drawable/ic_person"
                         />
                     <ImageButton
+                        android:id="@+id/addPictureButton"
                         android:layout_width="30dp"
                         android:layout_height="30dp"
                         android:layout_alignParentRight="true"

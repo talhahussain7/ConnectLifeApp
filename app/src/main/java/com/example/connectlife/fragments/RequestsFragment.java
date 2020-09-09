@@ -360,14 +360,18 @@ RecyclerView recyclerView;
                     String requestsCount = documentSnapshot.get("requestsCount").toString();
                     LatLng coordinates = fetchUserLocation(documentSnapshot.get("LatLng").toString());
                     String docRef = "";
-                    if(documentSnapshot.get("docRef").toString()!=null){
+                    String imgRef = "";
+                    if(documentSnapshot.get("docRef")!=null||!documentSnapshot.get("docRef").toString().equalsIgnoreCase("")){
                         docRef = documentSnapshot.get("docRef").toString();
+                    }
+                    if(documentSnapshot.get("imgRef")!=null||!documentSnapshot.get("imgRef").toString().equalsIgnoreCase("")){
+                        imgRef = documentSnapshot.get("imgRef").toString();
                     }
 
                     city = city.substring(0,1).toUpperCase()+ city.substring(1);
                     country = country.substring(0,1).toUpperCase()+ country.substring(1);
 
-                    user = new User(firebaseAuth.getCurrentUser().getUid(),name,city,country,coordinates,dob,phoneNumber,bloodGroup, docRef);
+                    user = new User(firebaseAuth.getCurrentUser().getUid(),name,city,country,coordinates,dob,phoneNumber,bloodGroup, docRef, imgRef);
 
                 }catch (Exception e){
                     e.printStackTrace();
