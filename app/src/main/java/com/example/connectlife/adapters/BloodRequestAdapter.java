@@ -2,7 +2,9 @@ package com.example.connectlife.adapters;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -92,19 +94,29 @@ public class BloodRequestAdapter extends RecyclerView.Adapter<BloodRequestAdapte
                             DocumentSnapshot document = task.getResult();
                             if (document.exists()) {
                                String token = document.getData().get("token").toString();
-
                                 DocumentReference docRef = FirebaseFirestore.getInstance().collection("users").document(FirebaseAuth.getInstance().getCurrentUser().getUid());
                                 docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                                     @Override
                                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                                         if(task.isSuccessful()){
                                             String name = task.getResult().getData().get("name").toString();
-                                            Toast.makeText(context, token, Toast.LENGTH_SHORT).show();
+                                            String city =task.getResult().getData().get("city").toString();
+                                             String  country =task.getResult().getData().get("country").toString();
+                                             String dob =task.getResult().getData().get("dob").toString();
+                                             String bloodGroup = task.getResult().getData().get("bloodGroup").toString();
+                                             LatLng coordinates = new LatLng(0,0);
+                                             String phoneNumber = task.getResult().getData().get("phoneNumber").toString();
+
+
+                                           // Toast.makeText(context, token, Toast.LENGTH_SHORT).show();
                                             String title= "Congratulations!";
                                             String message = "Your Blood Request was accepted by " + name;
                                             sendNotifications(token,title,message);
                                             removeRequest(item,position);
                                             successfulMsg();
+                                            updateDonationCount();
+                                            User user = new User(docRef.getId(),name,city,country,coordinates,dob,phoneNumber,bloodGroup,"","");
+                                            updateHistory(item,user);
                                         }
                                     }
                                 });
@@ -150,6 +162,35 @@ public class BloodRequestAdapter extends RecyclerView.Adapter<BloodRequestAdapte
 
             }
         });
+        holder.shareButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+               String name = item.getName();
+               String bloodGroup = item.getBloodGroup();
+               String number = item.getPhoneNumber();
+               String location = item.getLocation();
+
+                try{
+                    Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                    shareIntent.setType("text/plain");
+                    shareIntent.putExtra(Intent.EXTRA_SUBJECT,context.getString(R.string.app_name));
+                    String shareMessage =
+                           "URGENT BLOOD REQUEST"
+                                   +"\n" +
+                            "Person Name: " +name
+                                    +"\n" +
+                            "Blood group: "+bloodGroup
+                                    +"\n" +
+                            "Contact Number: "+ number
+                                    +"\n" +
+                                    "Location: " + location;
+                    shareIntent.putExtra(Intent.EXTRA_TEXT,shareMessage);
+                    context.startActivity(Intent.createChooser(shareIntent,"Share with"));
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+        });
 
     }
 
@@ -160,7 +201,7 @@ public class BloodRequestAdapter extends RecyclerView.Adapter<BloodRequestAdapte
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         TextView nameView, bloodGroupView, locationView;
-        Button acceptReqBtn;
+        Button acceptReqBtn,shareButton;
         MapView mapView;
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -169,6 +210,7 @@ public class BloodRequestAdapter extends RecyclerView.Adapter<BloodRequestAdapte
             locationView = itemView.findViewById(R.id.location);
             mapView = itemView.findViewById(R.id.mapView);
             acceptReqBtn = itemView.findViewById(R.id.accept_req_btn);
+            shareButton = itemView.findViewById(R.id.share_btn);
         }
     }
 
@@ -181,7 +223,7 @@ public class BloodRequestAdapter extends RecyclerView.Adapter<BloodRequestAdapte
             @Override
             public void onResponse(Call<MyResponse> call, Response<MyResponse> response) {
                 if (response.code() == 200) {
-                    Toast.makeText(context, "Sent!", Toast.LENGTH_SHORT).show();
+                  //  Toast.makeText(context, "Sent!", Toast.LENGTH_SHORT).show();
                 }else {
                     Toast.makeText(context, "Error", Toast.LENGTH_SHORT).show();
                 }
@@ -210,8 +252,56 @@ public class BloodRequestAdapter extends RecyclerView.Adapter<BloodRequestAdapte
                if(task.isSuccessful()){
                    bloodRequestList.remove(position);
                    notifyDataSetChanged();
+
+
+
                }
             }
         });
     }
+
+    public void updateDonationCount(){
+        FirebaseFirestore.getInstance()
+                .collection("users")
+                .document(FirebaseAuth.getInstance().getCurrentUser().getUid()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if(task.isSuccessful()){
+                    try{
+                        String value = task.getResult().getData().get("donationsCount").toString();
+                        int donationCount = Integer.valueOf(value);
+                        donationCount++;
+                        String updatedValue = String.valueOf(donationCount);
+                        Map<String,Object> updateInfo = new HashMap<>();
+                        updateInfo.put("donationsCount",updatedValue);
+                        FirebaseFirestore.getInstance()
+                                .collection("users")
+                                .document(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                                .update(updateInfo);
+                        Toast.makeText(context, donationCount, Toast.LENGTH_SHORT).show();
+                    }catch (Exception e){
+
+                    }
+                }
+
+            }
+        });
+
+    }
+
+    public void updateHistory(BloodRequest item, User user){
+        Map<String,Object> bundle = new HashMap<>();
+        bundle.put("AcceptedBy",user.getName());
+        bundle.put("AcceptedById",user.getId());
+        bundle.put("Status","approved");
+        bundle.put("OtherNum",user.getPhoneNumber());
+
+        FirebaseFirestore.getInstance().collection("history").document(item.getId()).update(bundle).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                Log.i("History","Update Success");
+            }
+        });
+    }
+
 }

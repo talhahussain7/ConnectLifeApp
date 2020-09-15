@@ -1,21 +1,27 @@
 package com.example.connectlife.fragments;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.BitmapShader;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -31,6 +37,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -40,8 +47,10 @@ import com.example.connectlife.MainActivity;
 import com.example.connectlife.R;
 import com.example.connectlife.WelcomeActivity;
 import com.example.connectlife.models.User;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -203,16 +212,27 @@ public class HomeFragment extends Fragment {
                     verifyCard.setVisibility(View.GONE);
                 }
                 if(documentSnapshot.get("imgRef")!=null&&!documentSnapshot.get("imgRef").toString().equalsIgnoreCase("")){
-                    imgRef = documentSnapshot.get("imgRef").toString();
-                    Handler handler = new Handler();
-                    Runnable r = new Runnable() {
-                        public void run() {
-                            Bitmap bitmap = getBitmapFromURL(imgRef);
-                            Bitmap resizedBitmap = getResizedBitmap(bitmap, 1024, 1024);
-                            profilePicture.setImageBitmap(resizedBitmap);
-                        }
-                    };
-                    handler.postDelayed(r, 10);
+                        imgRef = documentSnapshot.get("imgRef").toString();
+                        Handler handler = new Handler();
+                        Runnable r = new Runnable() {
+                            public void run() {
+                                Bitmap bitmap = getBitmapFromURL(imgRef);
+                                if(bitmap!=null){
+                                    Bitmap resizedBitmap = getResizedBitmap(bitmap, 1024, 1024);
+                                    Bitmap circleBitmap = Bitmap.createBitmap(resizedBitmap.getWidth(), resizedBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+
+                                    BitmapShader shader = new BitmapShader (resizedBitmap,  Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+                                    Paint paint = new Paint();
+                                    paint.setShader(shader);
+                                    paint.setAntiAlias(true);
+                                    Canvas c = new Canvas(circleBitmap);
+                                    c.drawCircle(resizedBitmap.getWidth()/2, resizedBitmap.getHeight()/2, resizedBitmap.getWidth()/2, paint);
+                                    profilePicture.setImageBitmap(circleBitmap);
+                                }
+
+                            }
+                        };
+                    handler.postDelayed(r, 0);
 
                 }
 
@@ -251,16 +271,47 @@ public class HomeFragment extends Fragment {
                 FirebaseAuth.getInstance().signOut();
                 startActivity(new Intent(getContext(), WelcomeActivity.class));
                 break;
+            case R.id.action_donate:
+                showDonationPopup();
+                break;
 
             case R.id.action_delete:
-                // TO be added later, just to avoid mistakingly deleting the account for now.
-                Toast.makeText(getContext(), "Delete Account", Toast.LENGTH_SHORT).show();
+                FirebaseFirestore.getInstance().collection("users").document(FirebaseAuth.getInstance().getCurrentUser().getUid()).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if(task.isSuccessful()){
+                            FirebaseAuth.getInstance().signOut();
+                            startActivity(new Intent(getContext(),WelcomeActivity.class));
+                        }
+                    }
+                });
                 break;
 
 
         }
         return super.onOptionsItemSelected(item);
     }
+
+
+    public void showDonationPopup(){
+        android.app.AlertDialog.Builder dialogBuilder = new android.app.AlertDialog.Builder(getContext());
+        final View popupView = getLayoutInflater().inflate(R.layout.donation_popup, null);
+        dialogBuilder.setView(popupView);
+        final AlertDialog alertDialog = dialogBuilder.create();
+        alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        ImageButton closeButton = popupView.findViewById(R.id.close_btn);
+        closeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alertDialog.dismiss();
+            }
+        });
+        alertDialog.show();
+    }
+
+
+
+
 
     public LatLng fetchUserLocation(String coodinateStr){
         String[] values = coodinateStr.split(",");
@@ -303,9 +354,19 @@ public class HomeFragment extends Fragment {
         } else if(requestCode == PICK_IMAGE_CODE && resultCode == getActivity().RESULT_OK && data != null && data.getData() != null){
             if (data.getData() != null) {
                 try {
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), data.getData());
-                    Bitmap resizedBitmap = getResizedBitmap(bitmap, 1024, 1024);
-                    profilePicture.setImageBitmap(resizedBitmap);
+                  Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), data.getData());
+                  Bitmap resizedBitmap = getResizedBitmap(bitmap, 1024, 1024);
+
+                    Bitmap circleBitmap = Bitmap.createBitmap(resizedBitmap.getWidth(), resizedBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+
+                    BitmapShader shader = new BitmapShader (resizedBitmap,  Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+                    Paint paint = new Paint();
+                    paint.setShader(shader);
+                    paint.setAntiAlias(true);
+                    Canvas c = new Canvas(circleBitmap);
+                    c.drawCircle(resizedBitmap.getWidth()/2, resizedBitmap.getHeight()/2, resizedBitmap.getWidth()/2, paint);
+                    profilePicture.setImageBitmap(circleBitmap);
+
                 }
                 catch (IOException e)
                 {

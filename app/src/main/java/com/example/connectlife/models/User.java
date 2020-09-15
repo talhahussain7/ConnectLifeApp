@@ -14,24 +14,12 @@ public class User {
     String phoneNumber;
     String bloodGroup;
     String docRef;
-
-    public String getImgRef() {
-        return imgRef;
-    }
-
-    public void setImgRef(String imgRef) {
-        this.imgRef = imgRef;
-    }
-
     String imgRef;
 
-    public String getDocRef() {
-        return docRef;
-    }
 
-    public void setDocRef(String docRef) {
-        this.docRef = docRef;
-    }
+
+
+
 
     //Address address;
     //List<BloodRequest> list;
@@ -51,6 +39,22 @@ public class User {
         this.imgRef = imgRef;
     }
 
+
+    public String getDocRef() {
+        return docRef;
+    }
+
+    public void setDocRef(String docRef) {
+        this.docRef = docRef;
+    }
+
+    public String getImgRef() {
+        return imgRef;
+    }
+
+    public void setImgRef(String imgRef) {
+        this.imgRef = imgRef;
+    }
     public String getId() {
         return id;
     }

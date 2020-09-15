@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -49,9 +50,12 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.tapadoo.alerter.Alerter;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import retrofit2.Call;
@@ -66,7 +70,9 @@ User user;
 List<BloodRequest> requestList;
 BloodRequestAdapter bloodRequestAdapter;
 RecyclerView recyclerView;
-    APIService apiService = Client.getClient("https://fcm.googleapis.com/").create(APIService.class);
+int donationCounter;
+int requestsCounter;
+APIService apiService = Client.getClient("https://fcm.googleapis.com/").create(APIService.class);
 
     public RequestsFragment() {
         // Required empty public constructor
@@ -78,6 +84,7 @@ RecyclerView recyclerView;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getUserDetails();
 
     }
 
@@ -206,7 +213,7 @@ RecyclerView recyclerView;
                             dataPacket.put("Location",user.getCity()+", "+user.getCountry());
                             dataPacket.put("LatLng",user.getCoordinates().getLatitude()+","+user.getCoordinates().getLongitude());
 
-                            Toast.makeText(getContext(), dataPacket.toString(), Toast.LENGTH_SHORT).show();
+                          //  Toast.makeText(getContext(), dataPacket.toString(), Toast.LENGTH_SHORT).show();
                             final DocumentReference documentReference = firebaseFirestore.collection("bloodRequests").document();
                             documentReference.set(dataPacket).addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
@@ -222,6 +229,22 @@ RecyclerView recyclerView;
                                                 }
                                             }
                                         });*/
+
+                                    String currentDate = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(new Date());
+
+                               Map<String,Object> bundle = new HashMap<>();
+                               bundle.put("Requestor",user.getName());
+                               bundle.put("RequestorId",user.getId());
+                               bundle.put("AcceptedById","");
+                               bundle.put("AcceptedBy","");
+                               bundle.put("OtherNum","");
+                               bundle.put("Status","pending");
+                               bundle.put("BloodGroup",s.getSelectedItem().toString());
+                               bundle.put("Location",user.getCity()+", "+user.getCountry());
+                              bundle.put("Date",currentDate);
+                               createHistoryObj(bundle,documentReference.getId());
+
+
                                     firebaseFirestore.collection("users").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                         @Override
                                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -229,17 +252,25 @@ RecyclerView recyclerView;
                                             if(task.isSuccessful()){
                                                 for(QueryDocumentSnapshot document :task.getResult()){
                                                     if(!document.getId().equals(firebaseAuth.getCurrentUser().getUid())){
+
                                                         //  Toast.makeText(getContext(), document.getId(), Toast.LENGTH_SHORT).show();
                                                         String token = document.getData().get("token").toString();
                                                         sendNotifications(token,"New Blood Request",s.getSelectedItem().toString() + " required urgently!");
+
                                                     }else{
-                                                        Toast.makeText(getContext(), "I got skipped", Toast.LENGTH_SHORT).show();
+                                                           String count = document.getData().get("requestsCount").toString();
+                                                           int countInt = Integer.valueOf(count);
+                                                        updateUserReqCount(countInt);
+                                                      //  Toast.makeText(getContext(), "I got skipped", Toast.LENGTH_SHORT).show();
                                                     }
                                                 }
                                             }
                                         }
 
                                     });
+
+                                   // firebaseFirestore.collection("users").document(user.getId()).update("requestsCount",String.valueOf(requestsCounter));
+
 
                                     alertDialog.dismiss();
                                 }
@@ -330,7 +361,7 @@ RecyclerView recyclerView;
             @Override
             public void onResponse(Call<MyResponse> call, Response<MyResponse> response) {
                 if (response.code() == 200) {
-                    Toast.makeText(getContext(), "Sent!", Toast.LENGTH_SHORT).show();
+                   // Toast.makeText(getContext(), "Sent!", Toast.LENGTH_SHORT).show();
                 }else {
                     Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
                 }
@@ -370,7 +401,8 @@ RecyclerView recyclerView;
 
                     city = city.substring(0,1).toUpperCase()+ city.substring(1);
                     country = country.substring(0,1).toUpperCase()+ country.substring(1);
-
+                    donationCounter = Integer.valueOf(donationsCount);
+                    requestsCounter = Integer.valueOf(requestsCount);
                     user = new User(firebaseAuth.getCurrentUser().getUid(),name,city,country,coordinates,dob,phoneNumber,bloodGroup, docRef, imgRef);
 
                 }catch (Exception e){
@@ -381,6 +413,26 @@ RecyclerView recyclerView;
 
         });
         return true;
+    }
+
+    public void updateUserReqCount(int countValue){
+        countValue++;
+        Map<String,Object> updateInfo = new HashMap<>();
+        String updatedCount = String.valueOf(countValue);
+        updateInfo.put("requestsCount",updatedCount);
+        firebaseFirestore.collection("users").document(firebaseAuth.getCurrentUser().getUid()).update(updateInfo);
+
+    }
+
+    public void createHistoryObj(Map<String,Object> bundle,String id){
+        firebaseFirestore.collection("history").document(id).set(bundle).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if(task.isSuccessful()){
+                    Log.i("History Message","Successful!");
+                }
+            }
+        });
     }
 
 }

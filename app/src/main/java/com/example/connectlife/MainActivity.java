@@ -9,6 +9,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import android.Manifest;
@@ -16,23 +17,35 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.BitmapShader;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.Shader;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.StrictMode;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.connectlife.fragments.AboutFragment;
+import com.example.connectlife.fragments.HistoryFargment;
 import com.example.connectlife.fragments.HomeFragment;
 import com.example.connectlife.fragments.MembersNearby;
+import com.example.connectlife.fragments.ProfileEditFragment;
 import com.example.connectlife.fragments.RequestsFragment;
 import com.example.connectlife.fragments.WelcomeFragments.AddRequestFragment;
 import com.example.connectlife.models.User;
@@ -48,6 +61,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -59,13 +73,16 @@ import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
-
+    View headerView;
     View mainContainer;
     DrawerLayout drawerLayout;
     Toolbar toolbar;
@@ -77,6 +94,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     DocumentReference userDocument;
     public static User currentUser;
     public static FragmentManager fragmentManager;
+    TextView userFullNameTextView, locationTextView;
+    ImageView profilePicture;
+    String nameGlobal,bloodGroupGlobal, locationCity, locationCountry;
+    String imageRef;
 
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -111,8 +132,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigationView.setNavigationItemSelectedListener(this);
         ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.nav_drawer_open, R.string.nav_drawer_close);
         actionBarDrawerToggle.syncState();
-
-
+        headerView = navigationView.getHeaderView(0);
+        userFullNameTextView = headerView.findViewById(R.id.user_name_text);
+        locationTextView = headerView.findViewById(R.id.location_text);
+        profilePicture = headerView.findViewById(R.id.imageView);
+        setNavigationHeader();
         Window window = this.getWindow();
 // clear FLAG_TRANSLUCENT_STATUS flag:
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
@@ -147,7 +171,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                  updateToken();
 
+        headerView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                drawerLayout.closeDrawer(Gravity.LEFT);
+                Bundle bundle = new Bundle();
+                bundle.putString("Name",userFullNameTextView.getText().toString());
+                bundle.putString("BloodGroup",bloodGroupGlobal);
+                bundle.putString("City",locationCity);
+                bundle.putString("Country",locationCountry);
+                showEditProfileFragment(bundle);
 
+
+            }
+        });
 
 
     }
@@ -201,7 +238,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 getSupportFragmentManager().beginTransaction().replace(R.id.main_container,new MembersNearby(),"Members Nearby Fragment").commit();
                 break;
 
-
+            case R.id.nav_histoy:
+                fragmentTitle.setText("My History");
+                getSupportFragmentManager().beginTransaction().replace(R.id.main_container,new HistoryFargment(),"History Fragment").commit();
+                break;
 
             case R.id.nav_signout:
                 firebaseAuth.signOut();
@@ -257,13 +297,100 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         fragmentManager.beginTransaction().replace(R.id.main_container,new AboutFragment(),"About Fragment").commit();
     }
 
-    public static void showHomeFragment(){
-        fragmentTitle.setText(R.string.app_name);
-        fragmentManager.beginTransaction().replace(R.id.main_container,new HomeFragment(),"Home Fragment").commit();
+    public static void showEditProfileFragment(Bundle bundle){
+        fragmentTitle.setText("PROFILE");
+        Fragment profileFragment = new ProfileEditFragment();
+        profileFragment.setArguments(bundle);
+        fragmentManager.beginTransaction().replace(R.id.main_container,profileFragment,"Edit Profile").commit();
     }
+
 
     @Override
     public void onBackPressed() {
 
     }
+
+    public void setNavigationHeader(){
+        firebaseFirestore.collection("users")
+                .document(firebaseAuth.getCurrentUser().getUid()).get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if(task.isSuccessful()){
+                    String fullName = task.getResult().getData().get("name").toString();
+                    String city =  task.getResult().getData().get("city").toString();
+                    String country =  task.getResult().getData().get("country").toString();
+                    String bgroup =  task.getResult().getData().get("bloodGroup").toString();
+                    locationCity= city;
+                    locationCountry =country;
+                    bloodGroupGlobal  = bgroup;
+                    userFullNameTextView.setText(fullName);
+                    locationTextView.setText(city +", " +country);
+
+
+                    if(task.getResult().getData().get("imgRef")!=null&&!task.getResult().getData().get("imgRef").toString().equalsIgnoreCase("")){
+                        imageRef = task.getResult().getData().get("imgRef").toString();
+                        Handler handler = new Handler();
+                        Runnable r = new Runnable() {
+                            public void run() {
+                                Bitmap bitmap = getBitmapFromURL(imageRef);
+                                if(bitmap!=null){
+                                    Bitmap resizedBitmap = getResizedBitmap(bitmap, 1024, 1024);
+                                    Bitmap circleBitmap = Bitmap.createBitmap(resizedBitmap.getWidth(), resizedBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+
+                                    BitmapShader shader = new BitmapShader (resizedBitmap,  Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+                                    Paint paint = new Paint();
+                                    paint.setShader(shader);
+                                    paint.setAntiAlias(true);
+                                    Canvas c = new Canvas(circleBitmap);
+                                    c.drawCircle(resizedBitmap.getWidth()/2, resizedBitmap.getHeight()/2, resizedBitmap.getWidth()/2, paint);
+                                    profilePicture.setImageBitmap(circleBitmap);
+                                }
+
+                            }
+                        };
+                        handler.postDelayed(r, 0);
+
+                    }
+
+
+                }
+            }
+        });
+
+    }
+    public Bitmap getBitmapFromURL(String src) {
+        try {
+            java.net.URL url = new java.net.URL(src);
+            HttpURLConnection connection = (HttpURLConnection) url
+                    .openConnection();
+            connection.setDoInput(true);
+            connection.connect();
+            InputStream input = connection.getInputStream();
+            Bitmap myBitmap = BitmapFactory.decodeStream(input);
+            return myBitmap;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public Bitmap getResizedBitmap(Bitmap bm, int newHeight, int newWidth) {
+        int width = bm.getWidth();
+        int height = bm.getHeight();
+        float scaleWidth = ((float) newWidth) / width;
+        float scaleHeight = ((float) newHeight) / height;
+        // CREATE A MATRIX FOR THE MANIPULATION
+        Matrix matrix = new Matrix();
+        // RESIZE THE BIT MAP
+        matrix.postScale(scaleWidth, scaleHeight);
+
+        // "RECREATE" THE NEW BITMAP
+        Bitmap resizedBitmap = Bitmap.createBitmap(bm, 0, 0, width, height,
+                matrix, false);
+
+        return resizedBitmap;
+    }
+
+
 }

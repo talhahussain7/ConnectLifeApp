@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <group android:checkableBehavior="single">
-    <item android:id="@+id/nav_home" android:title="Home"/>
-        <item android:id="@+id/nav_requests" android:title="Blood Requests"/>
-        <item android:id="@+id/nav_histoy" android:title="My History"/>
-        <item android:id="@+id/nav_nearby" android:title="Members Nearby"/>
+    <group android:checkableBehavior="single" android:id="@+id/menu_top">
+    <item android:id="@+id/nav_home" android:title="Home" android:icon="@drawable/ic_baseline_home_24"/>
+        <item android:id="@+id/nav_requests" android:title="Blood Requests" android:icon="@drawable/ic_baseline_send_24" />
+        <item android:id="@+id/nav_histoy" android:title="My History" android:icon="@drawable/ic_baseline_history_24"/>
+        <item android:id="@+id/nav_nearby" android:title="Members Nearby" android:icon="@drawable/ic_baseline_members_24"/>
         
     </group>
 
-    <group >
-        <item android:id="@+id/nav_signout" android:title="Sign Out">Sign Out</item>
+    <group android:id="@+id/menu_bottom" android:checkableBehavior="none" >
+        <item android:id="@+id/nav_signout" android:icon="@drawable/ic_baseline_call_missed_outgoing_24" android:title="Sign Out">Sign Out</item>
     </group>
 </menu>

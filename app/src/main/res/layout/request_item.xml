@@ -78,6 +78,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:text="Share"
+                    android:id="@+id/share_btn"
                     android:textAllCaps="true"
                     android:textColor="@android:color/white"
                     android:background="@color/colorPrimary"
